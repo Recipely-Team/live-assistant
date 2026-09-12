@@ -25,7 +25,7 @@
  *   tree, so the check is the same offline and in CI.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -99,6 +99,12 @@ for (const dir of packageDirs) {
     if (!target.endsWith(suffix)) {
       errors.push(`${name}: "${field}" is ${target}, not a ${suffix} file — an installer cannot load TypeScript source`);
     }
+  }
+
+  // A config plugin missing from `files` breaks every integrator's prebuild and
+  // nothing else notices: it is not imported, so no build or test reaches it.
+  if (existsSync(path.join(PACKAGES, dir, 'app.plugin.js')) && !listed.includes('app.plugin.js')) {
+    errors.push(`${name}: ships an Expo config plugin that the tarball does not carry — add app.plugin.js to "files"`);
   }
 
   if (!listed.includes('README.md')) errors.push(`${name}: the tarball has no README.md — its npm page would be blank`);

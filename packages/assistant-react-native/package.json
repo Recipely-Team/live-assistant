@@ -28,6 +28,7 @@
     "src",
     "README.md",
     "LICENSE",
+    "app.plugin.js",
     "!src/**/__tests__",
     "!src/**/__fixtures__"
   ],

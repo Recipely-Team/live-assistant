@@ -14,7 +14,9 @@ module.exports = [
   // load anything.
   ...tseslint.configs.recommended.map((config) => ({ ...config, files: SOURCE })),
   {
-    files: ['*.js'],
+    // Config files at the root, and the Expo config plugins inside packages, are
+    // CommonJS modules read by node at config time — not part of any bundle.
+    files: ['*.js', 'packages/*/app.plugin.js'],
     languageOptions: {
       sourceType: 'commonjs',
       globals: { module: 'writable', require: 'readonly', __dirname: 'readonly' },

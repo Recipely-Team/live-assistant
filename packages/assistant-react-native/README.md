@@ -23,43 +23,42 @@ npm install @live-assistant/react-native react-native-audio-api
 On the web nothing native is needed, but `getUserMedia` only exists in a
 **secure context** — serve the page from `https://` or `localhost`.
 
-## 2. Configure the microphone
-
-`react-native-audio-api` ships an Expo config plugin whose **defaults are wrong
-for a voice assistant**. Both mistakes stay invisible until late:
-
-| Plugin defaults | Consequence |
-| --- | --- |
-| `UIBackgroundModes: ["audio"]` | Declares background audio you never play. App Review rejects it under guideline 2.5.4 |
-| no `NSMicrophoneUsageDescription` | iOS kills the app the moment it asks for the microphone |
-
-Pass options instead of the bare string:
+## 2. Configure the microphone — one line
 
 ```json
 {
   "expo": {
     "plugins": [
       [
-        "react-native-audio-api",
-        {
-          "iosMicrophonePermission": "Acme uses your microphone so you can talk to the assistant.",
-          "iosBackgroundMode": false,
-          "androidForegroundService": false,
-          "androidPermissions": []
-        }
+        "@live-assistant/react-native",
+        { "microphonePermission": "Acme uses your microphone so you can talk to the assistant." }
       ]
     ]
   }
 }
 ```
 
-Checked by running `expo prebuild` and reading the generated files: this writes
-`NSMicrophoneUsageDescription`, leaves `UIBackgroundModes` out, adds
-`android.permission.RECORD_AUDIO`, and adds no foreground service.
+That is the whole native setup. The plugin ships with the library and writes what
+a voice assistant actually needs — verified by running `expo prebuild` and
+reading the generated files, not the config:
 
-In a bare React Native app, add `NSMicrophoneUsageDescription` to
-`ios/<App>/Info.plist` yourself; `RECORD_AUDIO` arrives through the module's own
-manifest merge.
+| Generated | Value |
+| --- | --- |
+| `NSMicrophoneUsageDescription` | your sentence — without it iOS terminates the app at the first microphone request |
+| `UIBackgroundModes` | **absent**. `react-native-audio-api`'s own default adds `["audio"]`, which App Review rejects under guideline 2.5.4 when nothing plays in the background |
+| `android.permission.RECORD_AUDIO` | present |
+| foreground service | none |
+
+**Do not also list `react-native-audio-api` in `plugins`.** Its plugin runs once,
+so whichever is listed first wins — and if that is theirs, you get the defaults
+this one exists to avoid.
+
+Need background audio for real? Configure `react-native-audio-api` yourself
+instead of using this plugin, and be ready to justify the background mode.
+
+**Without Expo config plugins** (a bare React Native app), add
+`NSMicrophoneUsageDescription` to `ios/<App>/Info.plist` by hand. `RECORD_AUDIO`
+arrives through the module's own manifest merge on Android.
 
 ## 3. Mint tokens on your server
 

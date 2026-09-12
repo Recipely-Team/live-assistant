@@ -18,6 +18,18 @@ port, so other realtime providers can be added without changing your UI.
 | `@live-assistant/widget` | A drop-in orb and panel, themed and worded by you | client (React Native / web) |
 | `@live-assistant/token-server` | Mints short-lived Gemini tokens, so your API key never ships | your server (Node ≥ 18) |
 
+## Where it runs
+
+| Target | Supported | What carries the audio |
+| --- | --- | --- |
+| iOS, Android — React Native or Expo | yes | `react-native-audio-api` (a native module: development build, not Expo Go) |
+| Web in an Expo / React Native Web app | yes | Web Audio; Metro picks the `.web` halves |
+| Plain React on the web — Vite, Next, webpack | yes, without the widget | Web Audio; the `browser` field picks the `.web` halves. `@live-assistant/widget` needs React Native Web, the rest does not |
+| Node, on your server | `@live-assistant/token-server` only | nothing — it mints tokens |
+
+`getUserMedia` exists only in a secure context, so any web target must be served
+from `https://` or `localhost`.
+
 ```mermaid
 flowchart LR
   subgraph Device
@@ -89,44 +101,41 @@ The web needs no native module — `@live-assistant/audio` uses Web Audio there 
 but `getUserMedia` only exists in a **secure context**, so the page must be on
 `https://` or `localhost`.
 
-### 2. Configure the native module
-
-`react-native-audio-api` ships an Expo config plugin. **Its defaults are wrong for
-a voice assistant**, and both mistakes are invisible until late:
-
-| With the plugin's defaults | What it does to your app |
-| --- | --- |
-| `UIBackgroundModes: ["audio"]` in `Info.plist` | Declares background audio you do not play. App Review rejects this under guideline 2.5.4 — twice, in the app this library came out of |
-| **no** `NSMicrophoneUsageDescription` | iOS terminates the app the moment it asks for the microphone |
-
-So pass options rather than the bare string:
+### 2. Configure the microphone — one line
 
 ```json
 {
   "expo": {
     "plugins": [
       [
-        "react-native-audio-api",
-        {
-          "iosMicrophonePermission": "Acme uses your microphone so you can talk to the assistant.",
-          "iosBackgroundMode": false,
-          "androidForegroundService": false,
-          "androidPermissions": []
-        }
+        "@live-assistant/react-native",
+        { "microphonePermission": "Acme uses your microphone so you can talk to the assistant." }
       ]
     ]
   }
 }
 ```
 
-Verified by running `expo prebuild` and reading the generated files, not the
-config: this writes `NSMicrophoneUsageDescription`, leaves `UIBackgroundModes`
-out, adds `android.permission.RECORD_AUDIO`, and adds no foreground service.
-Turn `iosBackgroundMode` on only if you genuinely keep playing audio while
-backgrounded — and then be ready to justify it.
+That is the whole native setup. The plugin ships with the library and writes what
+a voice assistant actually needs — verified by running `expo prebuild` and
+reading the generated files, not the config:
 
-**Without Expo config plugins** (a bare React Native app), do the same by hand:
-add `NSMicrophoneUsageDescription` to `ios/<App>/Info.plist`. `RECORD_AUDIO`
+| Generated | Value |
+| --- | --- |
+| `NSMicrophoneUsageDescription` | your sentence — without it iOS terminates the app at the first microphone request |
+| `UIBackgroundModes` | **absent**. `react-native-audio-api`'s own default adds `["audio"]`, which App Review rejects under guideline 2.5.4 when nothing plays in the background |
+| `android.permission.RECORD_AUDIO` | present |
+| foreground service | none |
+
+**Do not also list `react-native-audio-api` in `plugins`.** Its plugin runs once,
+so whichever is listed first wins — and if that is theirs, you get the defaults
+this one exists to avoid.
+
+Need background audio for real? Configure `react-native-audio-api` yourself
+instead of using this plugin, and be ready to justify the background mode.
+
+**Without Expo config plugins** (a bare React Native app), add
+`NSMicrophoneUsageDescription` to `ios/<App>/Info.plist` by hand. `RECORD_AUDIO`
 arrives through the module's own manifest merge on Android.
 
 ### 3. Mint tokens on your server

@@ -7,48 +7,49 @@ by file extension, so you import one name and get the right implementation.
 npm install @live-assistant/audio react-native-audio-api
 ```
 
-## Native setup — read this before your first run
+## Native setup — one line
 
-`react-native-audio-api` is a **native module**, which has two consequences that
-cost people an afternoon each:
-
-- **Expo Go cannot load it.** Use a development build
-  (`npx expo prebuild && npx expo run:ios`) or EAS Build.
-- Installing it means rebuilding the app.
-
-Its Expo config plugin has **defaults that are wrong for a voice assistant**:
-
-| With the defaults | What happens |
-| --- | --- |
-| `UIBackgroundModes: ["audio"]` lands in `Info.plist` | You declare background audio you never play. App Review rejects that under guideline 2.5.4 |
-| no `NSMicrophoneUsageDescription` | iOS terminates the app when it asks for the microphone |
-| a foreground service and `FOREGROUND_SERVICE` permissions on Android | Android asks for capabilities a voice session does not use |
-
-So configure it:
+The library ships an Expo config plugin, so this is the whole of it:
 
 ```json
-[
-  "react-native-audio-api",
-  {
-    "iosMicrophonePermission": "Acme uses your microphone so you can talk to the assistant.",
-    "iosBackgroundMode": false,
-    "androidForegroundService": false,
-    "androidPermissions": []
-  }
-]
+["@live-assistant/audio", { "microphonePermission": "Acme uses your microphone so you can talk to the assistant." }]
 ```
 
-Verified by running `expo prebuild` and reading the **generated** files rather
-than the config: `NSMicrophoneUsageDescription` written, `UIBackgroundModes`
-absent, `android.permission.RECORD_AUDIO` present, no foreground service.
-Config is not the artifact — check the artifact.
+(If you installed `@live-assistant/react-native`, name that instead — same
+plugin.)
 
-Bare React Native: add `NSMicrophoneUsageDescription` to `ios/<App>/Info.plist`
-by hand. `RECORD_AUDIO` comes in through the module's own manifest merge.
+It writes what a voice assistant needs, checked by running `expo prebuild` and
+reading the **generated** files rather than the config: the microphone usage
+description set to your sentence, **no** `UIBackgroundModes`,
+`android.permission.RECORD_AUDIO` present, and no foreground service.
 
-**The web needs nothing native**, but `getUserMedia` exists only in a secure
-context — `https://` or `localhost`. Everything else answers
-`microphone_unavailable`.
+Left to `react-native-audio-api`'s own plugin defaults you would get
+`UIBackgroundModes: ["audio"]` — background audio nothing here plays, which App
+Review rejects under guideline 2.5.4 — and **no** microphone usage description,
+so iOS terminates the app at the first request. That is why this plugin exists.
+**Do not list `react-native-audio-api` in `plugins` as well**: its plugin runs
+once, and whichever is listed first wins.
+
+Two more things the first run depends on:
+
+- **Expo Go cannot load this.** `react-native-audio-api` is a native module.
+  Build a development build (`npx expo prebuild && npx expo run:ios`) or use EAS.
+- **Bare React Native**: add `NSMicrophoneUsageDescription` to
+  `ios/<App>/Info.plist` yourself; `RECORD_AUDIO` arrives through the module's
+  manifest merge.
+
+## On the web, with or without React Native
+
+Nothing native is involved: the `.web` halves use Web Audio.
+
+- In an **Expo / React Native Web** app, Metro picks them by file extension.
+- In a **plain React** app — Vite, Next, webpack, esbuild — the package's
+  `browser` field points at them, so a browser build never reaches the native
+  module. Checked by bundling an installed copy for `platform=browser`:
+  `react-native-audio-api` does not appear in the output.
+
+Either way `getUserMedia` needs a **secure context**, so serve from `https://` or
+`localhost`. Anything else answers `microphone_unavailable`.
 
 ## What it does that a recorder does not
 
