@@ -1,0 +1,63 @@
+name: Release
+
+# Publishes every package at the version in the tag, with no credential at all:
+# npm's trusted publishing exchanges GitHub's OIDC token for a short-lived
+# publish grant. There is no NPM_TOKEN in this repository, and there should never
+# be one — a token that can publish is the thing this replaces.
+#
+# To release: bump locally and push the tag.
+#
+#   npm version <patch|minor|major> --workspaces --include-workspace-root
+#   git push --follow-tags
+#
+# The seven packages share one version, because the umbrella pins its five
+# members exactly and a mismatch is not installable.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC; without it npm falls back to looking for a token
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
+      # Trusted publishing needs npm 11.5.1 or later; node 22 ships npm 10.
+      - run: npm install -g npm@^11.5.1
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+      # The artifact gate, before anything leaves the machine.
+      - run: npm run check:pack
+
+      - name: The tag must match the version being published
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          packaged="$(node -p "require('./packages/assistant-core/package.json').version")"
+          if [ "$tagged" != "$packaged" ]; then
+            echo "tag $GITHUB_REF_NAME does not match package version $packaged" >&2
+            exit 1
+          fi
+          echo "releasing $packaged"
+
+      # Dependency order: a package cannot be installed before the packages it
+      # depends on exist at the pinned version.
+      - run: npm publish -w @live-assistant/core
+      - run: npm publish -w @live-assistant/gemini
+      - run: npm publish -w @live-assistant/audio
+      - run: npm publish -w @live-assistant/react
+      - run: npm publish -w @live-assistant/token-server
+      - run: npm publish -w @live-assistant/widget
+      - run: npm publish -w @live-assistant/react-native
