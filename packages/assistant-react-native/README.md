@@ -216,6 +216,7 @@ Flow. That is expected, and the same reason the token server is separate.
 | `connect_timed_out` | Check the model you minted with is callable for your key; a model can be listed and still not exist |
 | `no_answer` | The tools declared at mint time do not match what the app registered |
 | Android echoes | Expected: Android's recorder has no echo cancellation, so the controller holds the microphone shut while the assistant is audible |
+| On the web, `start()` never settles | The session was started outside a user gesture. A browser leaves `AudioContext.resume()` pending until the page has been interacted with, so start from a press — which is what the orb already is |
 
 Failures are codes, never sentences. Map them to words yourself — the library
 ships no user-facing copy.

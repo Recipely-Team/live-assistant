@@ -51,6 +51,14 @@ Nothing native is involved: the `.web` halves use Web Audio.
 Either way `getUserMedia` needs a **secure context**, so serve from `https://` or
 `localhost`. Anything else answers `microphone_unavailable`.
 
+**Start the session from a user gesture.** A browser leaves
+`AudioContext.resume()` pending until the page has been interacted with, so
+`PcmPlayer.prepare()` called on page load never settles — and neither does
+`start()`. Pressing the orb, or any button, is the gesture. Verified by running
+the web halves in a plain browser build: from a click,
+`prepare(24000)` returns ok, a second of audio reports `remainingSeconds=1.00`
+and a real `level()`, and `flush()` takes it back to zero.
+
 ## What it does that a recorder does not
 
 - **It promises a sample rate rather than requesting one.** Platform recorders

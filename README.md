@@ -300,6 +300,7 @@ Failures come back as codes, never as user-facing text. The widget maps them thr
 | `no_answer` | The model produced nothing for a turn. Usually the tools you declared at mint time do not match what the app registered |
 | Nothing is heard, no error | The token was minted without audio output, or the player was never prepared. Check `AssistantStatus` reaches `speaking` |
 | It works on iOS and echoes on Android | Expected: Android's recorder has no echo cancellation, so the controller holds the microphone shut while the assistant is audible. Do not send audio yourself while `speaking` |
+| On the web, `start()` never settles | The session was started outside a user gesture. A browser leaves `AudioContext.resume()` pending until the page has been interacted with, so start from a press — which is what the orb already is |
 | The assistant answers a recipe you mentioned earlier, not the one on screen | A tool-design problem, not a library one: give your screen-reading tools the current screen's state, not the conversation's memory |
 
 Failures are codes, never sentences (`AssistantFailureCode`). If you are showing
