@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Lint, typecheck, build, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      # Before the tests: a package that cannot build is not publishable, and
+      # `prepublishOnly` would only find that out at `npm publish`.
+      - run: npm run build
+      - run: npm test
+
+  pack:
+    name: Every package packs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # `npm pack` is the only check that sees what an installer downloads.
+      # A missing `main`, a `files` list that forgot dist/, or a stray test in
+      # the tarball is invisible to every other gate.
+      - name: Pack each package and assert its entry points exist
+        run: node scripts/assert-tarballs.mjs

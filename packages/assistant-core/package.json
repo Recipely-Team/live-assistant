@@ -4,6 +4,15 @@
   "description": "Provider-neutral ports for an in-app voice assistant: the session, its events, audio, and the result type they share.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recipely-Team/live-assistant.git",
+    "directory": "packages/assistant-core"
+  },
+  "homepage": "https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-core#readme",
+  "bugs": {
+    "url": "https://github.com/Recipely-Team/live-assistant/issues"
+  },
   "keywords": [
     "voice-assistant",
     "realtime",

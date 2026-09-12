@@ -4,6 +4,15 @@
   "description": "Headless React bindings for @live-assistant/core: session state, transcript, per-frame levels and tool registration — build any UI, or use @live-assistant/widget.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recipely-Team/live-assistant.git",
+    "directory": "packages/assistant-react"
+  },
+  "homepage": "https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-react#readme",
+  "bugs": {
+    "url": "https://github.com/Recipely-Team/live-assistant/issues"
+  },
   "keywords": [
     "react",
     "react-native",

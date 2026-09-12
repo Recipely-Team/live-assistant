@@ -4,6 +4,15 @@
   "description": "A ready-made voice assistant UI for React Native and the web: an orb that moves with the voices, a transcript and controls, themed and worded by the app. Built only on @live-assistant/react's public hooks.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recipely-Team/live-assistant.git",
+    "directory": "packages/assistant-widget"
+  },
+  "homepage": "https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-widget#readme",
+  "bugs": {
+    "url": "https://github.com/Recipely-Team/live-assistant/issues"
+  },
   "keywords": [
     "react-native",
     "ui",

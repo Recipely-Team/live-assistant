@@ -4,6 +4,15 @@
   "description": "Server-side helper that mints short-lived Gemini Live tokens with your system instruction, tools and voice baked in, so the API key never reaches a device.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recipely-Team/live-assistant.git",
+    "directory": "packages/assistant-token-server"
+  },
+  "homepage": "https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-token-server#readme",
+  "bugs": {
+    "url": "https://github.com/Recipely-Team/live-assistant/issues"
+  },
   "keywords": [
     "gemini",
     "gemini-live",

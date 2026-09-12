@@ -194,3 +194,18 @@ Failures come back as codes, never as user-facing text. The widget maps them thr
 - **Widget requirements.** The widget needs React Native 0.76 or later. The panel's shadow uses `boxShadow`, which renders on the New Architecture and on the web; on the old architecture the panel simply has no shadow. Pass safe-area insets through `style` (for example `style={{ bottom: insets.bottom + 16 }}`) so the orb clears the iOS home indicator.
 - **Model names.** Verify the model you configure. A model can appear in the model list and still not be callable.
 - **Configuration lives in the token.** Gemini fixes the session setup when the token is minted, and a setup sent by the client is discarded.
+
+## Developing
+
+```sh
+npm install
+npm run check      # lint, typecheck, build, test, and pack every package
+```
+
+The seven packages live in one npm workspace and share one version number.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) has the layout, the standards and the
+release steps.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).

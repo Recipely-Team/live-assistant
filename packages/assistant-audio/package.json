@@ -4,6 +4,15 @@
   "description": "Microphone capture and streaming PCM playback for @live-assistant/core, on iOS, Android and the web, with levels an animation can read every frame.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recipely-Team/live-assistant.git",
+    "directory": "packages/assistant-audio"
+  },
+  "homepage": "https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-audio#readme",
+  "bugs": {
+    "url": "https://github.com/Recipely-Team/live-assistant/issues"
+  },
   "keywords": [
     "audio",
     "microphone",

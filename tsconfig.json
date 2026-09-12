@@ -1,0 +1,13 @@
+{
+  "//": "Typechecks the whole workspace, tests included. The packages' own tsconfig.build.json files emit dist/; this one only checks.",
+  "extends": "./packages/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "types": ["jest", "node"],
+    "paths": {
+      "@live-assistant/*": ["./packages/assistant-*/src/index.ts"]
+    }
+  },
+  "include": ["packages/*/src", "packages/*/scripts"]
+}

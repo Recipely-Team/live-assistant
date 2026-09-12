@@ -4,6 +4,15 @@
   "description": "One install for a voice assistant in a React Native or Expo app: the session, a Gemini Live connection, microphone and playback, React bindings and a ready-made widget, all re-exported from one place.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Recipely-Team/live-assistant.git",
+    "directory": "packages/assistant-react-native"
+  },
+  "homepage": "https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-react-native#readme",
+  "bugs": {
+    "url": "https://github.com/Recipely-Team/live-assistant/issues"
+  },
   "keywords": [
     "voice-assistant",
     "react-native",
