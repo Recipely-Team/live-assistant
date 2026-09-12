@@ -52,6 +52,19 @@ token server must not drag React Native onto a server, the audio package
 carries a native dependency that means a rebuild, and the widget is a UI
 anyone drawing their own should be able to leave out.
 
+**The umbrella is not free if you only want part of it.** It re-exports with
+`export *` from a CommonJS build, and Metro does not tree-shake, so importing
+anything from it pulls all five members into your bundle. Measured on an Expo
+web export of an app whose only import is `AssistantController`:
+
+| Imported from | Bundle | Carries |
+|---|---|---|
+| `@live-assistant/react-native` | 604 KB | the orb, panel, transcript, the Gemini session, the web microphone |
+| `@live-assistant/core` | 344 KB | none of them |
+
+So install the umbrella when you use the widget, and name the packages you
+import when you draw your own UI.
+
 ## Quick start (with the widget)
 
 **1. On your server**, mint a token after your own auth:
