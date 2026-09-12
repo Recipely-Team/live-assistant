@@ -14,10 +14,18 @@
  *   dependency on a sibling package is pinned to the exact version being
  *   published, because the umbrella is not installable if one of its members
  *   resolves to a different version.
- * - **It packs, it does not publish.** Nothing here talks to the registry.
+ * - **Then it loads them.** The three packages Node can load are extracted into
+ *   a throwaway `node_modules` and required, and one export of each is named.
+ *   The structural checks above would pass a `main` that points at a real file
+ *   which happens to be unloadable; requiring it is what proves the entry point.
+ *   The other four reach React Native, whose source is Flow, so Node cannot load
+ *   them by design — they are covered by the suite and by an app's bundler.
+ * - **It packs, it does not publish, and it needs no network.** Nothing here
+ *   talks to the registry: the tarballs are unpacked by hand into a temporary
+ *   tree, so the check is the same offline and in CI.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,8 +34,18 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGES = path.join(ROOT, 'packages');
 const SCOPE = '@live-assistant/';
 
+// One export per package that Node can load, chosen as the thing an integrator
+// reaches for first. The rest of the packages reach React Native (Flow source),
+// which Node cannot parse — that is by design, not a gap.
+const NODE_LOADABLE = {
+  '@live-assistant/core': 'ToolRegistry',
+  '@live-assistant/gemini': 'GeminiLiveSession',
+  '@live-assistant/token-server': 'mintGeminiLiveToken',
+};
+
 const errors = [];
 const staging = mkdtempSync(path.join(tmpdir(), 'live-assistant-pack-'));
+const tarballs = new Map();
 
 const packageDirs = readdirSync(PACKAGES, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -46,6 +64,8 @@ for (const dir of packageDirs) {
     errors.push(`${name}: npm pack produced no tarball`);
     continue;
   }
+
+  tarballs.set(name, path.join(staging, tarball));
 
   const listed = execFileSync('tar', ['-tzf', path.join(staging, tarball)], { encoding: 'utf8' })
     .split('\n')
@@ -94,6 +114,35 @@ for (const dir of packageDirs) {
   }
 }
 
+// --- load phase: require what an installer would receive --------------------
+const tree = path.join(staging, 'tree');
+for (const [name, tarball] of tarballs) {
+  if (!(name in NODE_LOADABLE)) continue;
+  const target = path.join(tree, 'node_modules', name);
+  mkdirSync(target, { recursive: true });
+  execFileSync('tar', ['-xzf', tarball, '-C', target, '--strip-components=1'], { stdio: 'pipe' });
+}
+
+const probe = path.join(tree, 'probe.cjs');
+writeFileSync(
+  probe,
+  `const expected = ${JSON.stringify(NODE_LOADABLE)};
+for (const [name, exported] of Object.entries(expected)) {
+  const loaded = require(name);
+  if (loaded[exported] === undefined) {
+    console.log(name + ': loaded, but does not export ' + exported);
+  }
+}
+`,
+);
+try {
+  const complaints = execFileSync(process.execPath, [probe], { encoding: 'utf8', stdio: 'pipe' }).trim();
+  if (complaints !== '') for (const line of complaints.split('\n')) errors.push(line);
+} catch (failure) {
+  const detail = String(failure.stderr ?? failure.message).split('\n').slice(0, 4).join(' / ');
+  errors.push(`a packed entry point could not be loaded by node: ${detail}`);
+}
+
 rmSync(staging, { recursive: true, force: true });
 
 if (errors.length > 0) {
@@ -101,4 +150,6 @@ if (errors.length > 0) {
   for (const error of errors.sort()) console.error('  ' + error);
   process.exit(1);
 }
-console.log(`assert-tarballs — OK (${packageDirs.length} packages)`);
+console.log(
+  `assert-tarballs — OK (${packageDirs.length} packages packed, ${Object.keys(NODE_LOADABLE).length} loaded on node)`,
+);

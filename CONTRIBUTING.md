@@ -75,7 +75,9 @@ packages it depends on exist at the pinned version. Each package's
 `prepublishOnly` builds it, so `dist/` is fresh whether or not anyone
 remembered.
 
-Two things that have already cost time:
+[`docs/regressions.md`](docs/regressions.md) records the packaging mistakes that
+have already been made here and what now catches each one. Two are worth
+repeating in place:
 
 - **`publishConfig` cannot carry `main` or `types`.** npm 11 leaves those
   overrides out of the tarball, so the fields are set directly. Verified by

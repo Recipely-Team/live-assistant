@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "build": "npm run build -w @live-assistant/core && npm run build -w @live-assistant/gemini && npm run build -w @live-assistant/audio && npm run build -w @live-assistant/react && npm run build -w @live-assistant/token-server && npm run build -w @live-assistant/widget && npm run build -w @live-assistant/react-native",
+    "prepare": "npm run build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
