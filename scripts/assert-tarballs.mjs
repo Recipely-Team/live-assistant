@@ -104,8 +104,21 @@ for (const dir of packageDirs) {
   if (!listed.includes('README.md')) errors.push(`${name}: the tarball has no README.md — its npm page would be blank`);
   if (!listed.includes('LICENSE')) errors.push(`${name}: the tarball has no LICENSE`);
 
-  const test = listed.find((entry) => entry.includes('__tests__') || entry.endsWith('.test.ts') || entry.endsWith('.test.tsx'));
-  if (test !== undefined) errors.push(`${name}: the tarball carries a test (${test}) — check the "files" list`);
+  // Tests and test doubles are both unpublished, for the same reason: a name a
+  // consumer cannot be expected to import is a name we could never change, and
+  // the fixtures reached the tarball at `dist/controller/__fixtures__/` before
+  // anybody decided they should. Exposing the fakes is a real feature — through a
+  // named entry point, deliberately, not as a side effect of the build.
+  const internal = listed.find(
+    (entry) =>
+      entry.includes('__tests__') ||
+      entry.includes('__fixtures__') ||
+      entry.endsWith('.test.ts') ||
+      entry.endsWith('.test.tsx'),
+  );
+  if (internal !== undefined) {
+    errors.push(`${name}: the tarball carries ${internal} — tests and fixtures are not published; check "files" and tsconfig.build.json`);
+  }
 
   for (const [dependency, range] of Object.entries(packed.dependencies ?? {})) {
     if (!dependency.startsWith(SCOPE)) continue;

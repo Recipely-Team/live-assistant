@@ -52,6 +52,26 @@ package and asserts the tarball's entry points resolve.
 - **Tests come with behaviour.** A fix ships the test that fails without it,
   named after the symptom someone saw rather than the mechanism.
 
+## What ships
+
+A tarball carries `dist`, `src`, the README and the LICENSE. `src` is there on
+purpose: `sourceMap` and `declarationMap` are on, so stepping into the library in
+a debugger lands on real source rather than on compiled output.
+
+Tests and test doubles do not ship. The fakes in
+`packages/assistant-core/src/controller/__fixtures__/` are genuinely useful to
+anyone testing against `AssistantController`, and they were being published —
+compiled into `dist/controller/__fixtures__/` — before anyone decided they should
+be. A name a consumer cannot be expected to import is a name we could never
+change afterwards. So they are excluded from the build and from the tarball, and
+the gate asserts it. **Exposing the fakes is a real feature worth doing
+deliberately**: a named entry point (`@live-assistant/core/testing`) with its own
+documentation, decided before 1.0.0 — not a side effect of a build exclude list.
+
+Inside this repository the sibling suites still import them through a deep `src/`
+path. That resolves through the workspace, never through a tarball, and it is
+test code in the same repository as the thing it tests.
+
 ## Releasing
 
 Versions move together: all seven packages share one version number, because

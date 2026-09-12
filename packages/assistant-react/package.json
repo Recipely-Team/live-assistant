@@ -28,7 +28,8 @@
     "src",
     "README.md",
     "LICENSE",
-    "!src/**/__tests__"
+    "!src/**/__tests__",
+    "!src/**/__fixtures__"
   ],
   "sideEffects": false,
   "scripts": {
