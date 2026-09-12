@@ -72,8 +72,10 @@ npm publish -w @live-assistant/react-native
 
 The order is the dependency order: a package cannot be installed before the
 packages it depends on exist at the pinned version. Each package's
-`prepublishOnly` builds it, so `dist/` is fresh whether or not anyone
-remembered.
+`prepack` builds it, so `dist/` is fresh whether or not anyone remembered —
+`prepack` rather than `prepublishOnly`, because npm runs it for `npm pack` as
+well, and packing to look at a release should not produce something different
+from the release.
 
 [`docs/regressions.md`](docs/regressions.md) records the packaging mistakes that
 have already been made here and what now catches each one. Two are worth

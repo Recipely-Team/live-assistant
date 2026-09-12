@@ -55,7 +55,10 @@ for (const dir of packageDirs) {
   const manifest = JSON.parse(readFileSync(path.join(PACKAGES, dir, 'package.json'), 'utf8'));
   const { name, version } = manifest;
 
-  execFileSync('npm', ['pack', '--workspace', name, '--pack-destination', staging], {
+  // `--ignore-scripts` is load-bearing: each package's `prepack` builds it, and a
+  // gate that rebuilds the tree before inspecting it can never catch a tarball
+  // whose `main` was never built. CI builds first, deliberately and separately.
+  execFileSync('npm', ['pack', '--ignore-scripts', '--workspace', name, '--pack-destination', staging], {
     cwd: ROOT,
     stdio: 'pipe',
   });
@@ -110,6 +113,21 @@ for (const dir of packageDirs) {
       errors.push(
         `${name}: depends on ${dependency}@${range} but is itself ${version} — sibling versions are pinned exactly and move together`,
       );
+    }
+  }
+}
+
+// --- the build script must name every package -------------------------------
+// The order is hard-coded because npm does not topologically order a
+// `--workspaces` script run. Nothing else notices when an eighth package is
+// added and left out of it: it would simply never be built, and its tarball
+// would be the one with no dist/.
+{
+  const rootBuild = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8')).scripts.build;
+  for (const dir of packageDirs) {
+    const { name } = JSON.parse(readFileSync(path.join(PACKAGES, dir, 'package.json'), 'utf8'));
+    if (!rootBuild.includes(`-w ${name}`)) {
+      errors.push(`${name}: the root "build" script does not build it — add it, in dependency order`);
     }
   }
 }

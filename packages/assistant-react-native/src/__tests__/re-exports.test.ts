@@ -13,11 +13,6 @@ jest.mock('react-native-audio-api', () => ({
   AudioContext: class {},
 }));
 
-// `import/namespace` cannot enumerate this module: everything in it arrives
-// through `export *` from another package, which is the one thing the rule
-// does not follow — and is exactly what this suite is here to check at
-// runtime instead.
-// eslint-disable-next-line import/namespace
 import * as kit from '../index';
 
 /**

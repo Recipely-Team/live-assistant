@@ -33,7 +33,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
-    "prepublishOnly": "npm run build"
+    "prepack": "npm run build"
   },
   "publishConfig": {
     "access": "public"
@@ -42,7 +42,7 @@
     "@live-assistant/core": "0.1.0"
   },
   "peerDependencies": {
-    "react-native": "*",
+    "react-native": ">=0.76",
     "react-native-audio-api": ">=0.13.3"
   }
 }

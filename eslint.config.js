@@ -54,11 +54,4 @@ module.exports = [
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
-  {
-    // One directive is kept although this repo's TypeScript resolver satisfies
-    // the rule: the comment beside it records what `export *` hides, and anyone
-    // linting the library without that resolver still needs it.
-    files: ['packages/assistant-react-native/src/__tests__/re-exports.test.ts'],
-    linterOptions: { reportUnusedDisableDirectives: 'off' },
-  },
 ];
