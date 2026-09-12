@@ -15,7 +15,7 @@
  */
 module.exports = {
   preset: 'react-native',
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/examples/'],
   modulePathIgnorePatterns: ['<rootDir>/packages/[^/]+/dist/'],
   moduleNameMapper: {
     '^@live-assistant/([a-z-]+)/(.*)$': '<rootDir>/packages/assistant-$1/$2',

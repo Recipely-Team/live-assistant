@@ -46,3 +46,18 @@ jobs:
       # the tarball is invisible to every other gate.
       - name: Pack each package and assert its entry points exist
         run: node scripts/assert-tarballs.mjs
+
+  example:
+    name: The example still builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      # An example nobody builds is an example that stops being true. This one
+      # resolves the library through the workspace, so a breaking change here
+      # fails before it is published.
+      - run: npm run check:example

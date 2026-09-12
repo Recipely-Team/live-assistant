@@ -10,7 +10,8 @@
     "url": "git+https://github.com/Recipely-Team/live-assistant.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "npm run build -w @live-assistant/core && npm run build -w @live-assistant/gemini && npm run build -w @live-assistant/audio && npm run build -w @live-assistant/react && npm run build -w @live-assistant/token-server && npm run build -w @live-assistant/widget && npm run build -w @live-assistant/react-native",
@@ -20,7 +21,8 @@
     "test": "jest",
     "check": "npm run lint && npm run typecheck && npm run build && npm test && npm run check:pack && npm run check:docs",
     "check:pack": "node scripts/assert-tarballs.mjs",
-    "check:docs": "node scripts/assert-doc-links.mjs"
+    "check:docs": "node scripts/assert-doc-links.mjs",
+    "check:example": "npm run typecheck -w @live-assistant/example-expo-app && npm run config -w @live-assistant/example-expo-app && npm run build:web -w @live-assistant/example-expo-app"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

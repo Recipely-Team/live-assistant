@@ -9,5 +9,6 @@
       "@live-assistant/*": ["./packages/assistant-*/src/index.ts"]
     }
   },
-  "include": ["packages/*/src", "packages/*/scripts"]
+  "include": ["packages/*/src", "packages/*/scripts"],
+  "exclude": ["examples"]
 }

@@ -144,6 +144,19 @@ The app never holds your Gemini API key. It calls your endpoint, your endpoint
 mints a short-lived token, and that token is what reaches Gemini — see the quick
 start below for both halves.
 
+## A working example
+
+[`examples/expo-app`](examples/expo-app) is a whole integration in one file —
+the real session, microphone, player, a tool and the widget, with one endpoint
+to point at your own server. CI typechecks and bundles it against the library in
+this repository on every pull request, so it cannot quietly stop being true.
+
+```sh
+git clone https://github.com/Recipely-Team/live-assistant && cd live-assistant
+npm install
+npm run build:web -w @live-assistant/example-expo-app
+```
+
 ## Quick start (with the widget)
 
 **1. On your server**, mint a token after your own auth:

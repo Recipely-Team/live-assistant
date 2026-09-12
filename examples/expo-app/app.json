@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Live Assistant Example",
+    "slug": "live-assistant-example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.example.liveassistant" },
+    "android": { "package": "com.example.liveassistant" },
+    "web": { "bundler": "metro" },
+    "plugins": [
+      [
+        "@live-assistant/react-native",
+        { "microphonePermission": "The example uses your microphone so you can talk to the assistant." }
+      ]
+    ]
+  }
+}

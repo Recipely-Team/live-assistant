@@ -7,7 +7,7 @@ const SOURCE = ['**/*.ts', '**/*.tsx'];
 const TESTS = ['**/__tests__/**', '**/__fixtures__/**', '**/*.test.ts', '**/*.test.tsx'];
 
 module.exports = [
-  { ignores: ['**/dist/**', 'eslint-rules/**'] },
+  { ignores: ['**/dist/**', 'eslint-rules/**', 'examples/*/.expo/**'] },
   js.configs.recommended,
   // The TypeScript rules apply to TypeScript. Left unscoped they also judge the
   // CommonJS config files at this root, where `require()` is the only way to
