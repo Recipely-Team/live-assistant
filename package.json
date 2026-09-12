@@ -18,8 +18,9 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "check": "npm run lint && npm run typecheck && npm run build && npm test && npm run check:pack",
-    "check:pack": "node scripts/assert-tarballs.mjs"
+    "check": "npm run lint && npm run typecheck && npm run build && npm test && npm run check:pack && npm run check:docs",
+    "check:pack": "node scripts/assert-tarballs.mjs",
+    "check:docs": "node scripts/assert-doc-links.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

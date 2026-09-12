@@ -26,6 +26,9 @@ jobs:
       # `prepublishOnly` would only find that out at `npm publish`.
       - run: npm run build
       - run: npm test
+      # Nothing else notices a link that leads nowhere, and these pages are
+      # read on npmjs.com where a broken one is the reader's dead end.
+      - run: npm run check:docs
 
   pack:
     name: Every package packs

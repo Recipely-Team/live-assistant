@@ -14,6 +14,12 @@ short enough to read in one sitting.
 | A package could be added to the workspace and never built — its tarball would be the one with no `dist/` | The root build script hard-codes the seven names and their order, because npm does not topologically order a `--workspaces` script run. Nothing objected to an eighth name missing from it | The gate asserts every workspace package is named in the root build script |
 | A source file was deleted and its compiled `.js`/`.d.ts` kept shipping | `tsc` writes into `outDir` and never removes what is no longer generated | Every package's `build` clears `dist` before compiling |
 
+## Documentation
+
+| Symptom | Root cause | What prevents it now |
+|---|---|---|
+| Every package's "see the overview" link led nowhere, on the pages people read on npmjs.com | Extracting the library moved `packages/README.md` to the repository root; the six links to `../README.md` were never updated. Lint, build and the suite all passed | `scripts/assert-doc-links.mjs` resolves every link and anchor, and rejects a relative link inside `packages/` outright — those pages are rendered on the registry, where a path up the tree leads nowhere |
+
 ## The rule these share
 
 A gate that reads the working tree cannot see a packaging bug. Lint, typecheck,

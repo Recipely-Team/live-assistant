@@ -65,6 +65,76 @@ web export of an app whose only import is `AssistantController`:
 So install the umbrella when you use the widget, and name the packages you
 import when you draw your own UI.
 
+## Install and set up
+
+Three steps, and none of them can be skipped: the package, the native audio
+module's configuration, and a server route that mints tokens.
+
+### 1. Install
+
+```sh
+npm install @live-assistant/react-native react-native-audio-api   # in the app
+npm install @live-assistant/token-server                          # on your server
+```
+
+`react-native-audio-api` is a **peer dependency and a native module**. Two
+consequences:
+
+- **Expo Go cannot run this.** It ships a fixed set of native modules and this is
+  not one of them. Use a development build: `npx expo prebuild && npx expo run:ios`
+  (or `run:android`), or EAS Build.
+- Adding it means a rebuild, not just a restart.
+
+The web needs no native module — `@live-assistant/audio` uses Web Audio there —
+but `getUserMedia` only exists in a **secure context**, so the page must be on
+`https://` or `localhost`.
+
+### 2. Configure the native module
+
+`react-native-audio-api` ships an Expo config plugin. **Its defaults are wrong for
+a voice assistant**, and both mistakes are invisible until late:
+
+| With the plugin's defaults | What it does to your app |
+| --- | --- |
+| `UIBackgroundModes: ["audio"]` in `Info.plist` | Declares background audio you do not play. App Review rejects this under guideline 2.5.4 — twice, in the app this library came out of |
+| **no** `NSMicrophoneUsageDescription` | iOS terminates the app the moment it asks for the microphone |
+
+So pass options rather than the bare string:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "react-native-audio-api",
+        {
+          "iosMicrophonePermission": "Acme uses your microphone so you can talk to the assistant.",
+          "iosBackgroundMode": false,
+          "androidForegroundService": false,
+          "androidPermissions": []
+        }
+      ]
+    ]
+  }
+}
+```
+
+Verified by running `expo prebuild` and reading the generated files, not the
+config: this writes `NSMicrophoneUsageDescription`, leaves `UIBackgroundModes`
+out, adds `android.permission.RECORD_AUDIO`, and adds no foreground service.
+Turn `iosBackgroundMode` on only if you genuinely keep playing audio while
+backgrounded — and then be ready to justify it.
+
+**Without Expo config plugins** (a bare React Native app), do the same by hand:
+add `NSMicrophoneUsageDescription` to `ios/<App>/Info.plist`. `RECORD_AUDIO`
+arrives through the module's own manifest merge on Android.
+
+### 3. Mint tokens on your server
+
+The app never holds your Gemini API key. It calls your endpoint, your endpoint
+mints a short-lived token, and that token is what reaches Gemini — see the quick
+start below for both halves.
+
 ## Quick start (with the widget)
 
 **1. On your server**, mint a token after your own auth:
@@ -207,6 +277,24 @@ Failures come back as codes, never as user-facing text. The widget maps them thr
 - **Widget requirements.** The widget needs React Native 0.76 or later. The panel's shadow uses `boxShadow`, which renders on the New Architecture and on the web; on the old architecture the panel simply has no shadow. Pass safe-area insets through `style` (for example `style={{ bottom: insets.bottom + 16 }}`) so the orb clears the iOS home indicator.
 - **Model names.** Verify the model you configure. A model can appear in the model list and still not be callable.
 - **Configuration lives in the token.** Gemini fixes the session setup when the token is minted, and a setup sent by the client is discarded.
+
+## When it does not work
+
+| What you see | What it is |
+| --- | --- |
+| `microphone_denied` | The user declined, or `NSMicrophoneUsageDescription` is missing so iOS never asked. Check the generated `Info.plist`, not `app.json` |
+| `microphone_unavailable` on a device | The native module is not in the binary. Expo Go cannot load it; rebuild with a development build |
+| `microphone_unavailable` in a browser | The page is not a secure context. `getUserMedia` needs `https://` or `localhost` |
+| `connection_refused` | Your `getConnection` threw. The thrown value is on `failure.cause` — usually your token route answering 401 or 503 |
+| `connect_timed_out` / `socket_failed` | The token was minted but the socket did not come up. Check the `model` you minted with actually exists for your key: a model can be listed and still not be callable |
+| `closed_before_ready` | Gemini closed during the handshake. Almost always a token that was already used — they are single-use |
+| `no_answer` | The model produced nothing for a turn. Usually the tools you declared at mint time do not match what the app registered |
+| Nothing is heard, no error | The token was minted without audio output, or the player was never prepared. Check `AssistantStatus` reaches `speaking` |
+| It works on iOS and echoes on Android | Expected: Android's recorder has no echo cancellation, so the controller holds the microphone shut while the assistant is audible. Do not send audio yourself while `speaking` |
+| The assistant answers a recipe you mentioned earlier, not the one on screen | A tool-design problem, not a library one: give your screen-reading tools the current screen's state, not the conversation's memory |
+
+Failures are codes, never sentences (`AssistantFailureCode`). If you are showing
+one to a person, map it yourself — the library has no user-facing copy.
 
 ## Developing
 
