@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Headless React bindings for @live-assistant/core: session state, transcript, per-frame levels and tool registration — build any UI, or use @live-assistant/widget.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/core": "0.1.0"
+    "@live-assistant/core": "0.2.0"
   },
   "peerDependencies": {
     "react": ">=18"

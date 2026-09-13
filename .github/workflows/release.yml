@@ -7,8 +7,12 @@ name: Release
 #
 # To release: bump locally and push the tag.
 #
-#   npm version <patch|minor|major> --workspaces --include-workspace-root
+#   npm version <x.y.z> --workspaces --include-workspace-root
 #   git push --follow-tags
+#
+# Pass the version, not `patch`/`minor`/`major`: the tag npm writes comes from the
+# workspace ROOT, so a relative bump there tags whatever the root happened to say
+# rather than what the packages now say.
 #
 # The seven packages share one version, because the umbrella pins its five
 # members exactly and a mismatch is not installable.

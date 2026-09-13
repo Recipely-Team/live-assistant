@@ -13,7 +13,8 @@
  *   and `types` name, a README and a LICENSE; it carries no tests; and every
  *   dependency on a sibling package is pinned to the exact version being
  *   published, because the umbrella is not installable if one of its members
- *   resolves to a different version.
+ *   resolves to a different version; and all seven packages, plus the workspace
+ *   root the release tag is cut from, carry that one version.
  * - **Then it loads them.** The three packages Node can load are extracted into
  *   a throwaway `node_modules` and required, and one export of each is named.
  *   The structural checks above would pass a `main` that points at a real file
@@ -133,6 +134,44 @@ for (const dir of packageDirs) {
         `${name}: depends on ${dependency}@${range} but is itself ${version} — sibling versions are pinned exactly and move together`,
       );
     }
+  }
+}
+
+// --- the seven packages, and the root, carry one version --------------------
+// The sibling-pin check above cannot see this on its own: nothing pins the token
+// server, so it could be left behind at the old version and still pass. The root
+// is checked because the release tag is cut from a `npm version` run that
+// includes it — with the root at 0.0.0, the documented bump tagged v0.1.0 while
+// the packages said 0.2.0, and the release workflow refused the mismatch.
+{
+  const versions = new Map();
+  for (const dir of packageDirs) {
+    const { name, version } = JSON.parse(readFileSync(path.join(PACKAGES, dir, 'package.json'), 'utf8'));
+    versions.set(name, version);
+  }
+  const root = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
+  // The example app installs the umbrella by version like any integrator. npm
+  // links it from the workspace either way, so a stale pin there is invisible
+  // until someone copies the example's package.json into a real app.
+  const examples = path.join(ROOT, 'examples');
+  for (const dir of readdirSync(examples, { withFileTypes: true }).filter((entry) => entry.isDirectory())) {
+    const manifest = JSON.parse(readFileSync(path.join(examples, dir.name, 'package.json'), 'utf8'));
+    for (const [dependency, range] of Object.entries(manifest.dependencies ?? {})) {
+      if (!dependency.startsWith(SCOPE)) continue;
+      if (range !== versions.get(dependency)) {
+        errors.push(
+          `${manifest.name}: depends on ${dependency}@${range}, which is not the ${versions.get(dependency)} in this tree`,
+        );
+      }
+    }
+  }
+
+  const distinct = new Set([...versions.values(), root]);
+  if (distinct.size > 1) {
+    const listing = [...versions].map(([name, version]) => `${name}@${version}`).join(', ');
+    errors.push(
+      `the packages do not share one version — root@${root}, ${listing}; they are pinned to each other and release under one tag`,
+    );
   }
 }
 
