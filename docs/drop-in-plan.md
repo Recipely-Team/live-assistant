@@ -1,6 +1,6 @@
 # Board — import it, drop the widget in, it works
 
-**State 2026-09-13:** everything below is built and green (`npm run check`, `npm run check:example`); what is left is the release itself and the app taking it.
+**Done 2026-09-13.** Released as 0.3.0 (`8c1bfcb`, tag `v0.3.0`), published by hand because trusted publishing is still unconfigured, and taken by the app in recipely#437. What is left is not code: the owner configuring a trusted publisher per package on npmjs.com, and a live browser check of the page pack with a real token.
 
 Status board for the 0.3.0 work. Tick a box only when its gate is green; the
 next session starts by reading this file.
@@ -71,9 +71,9 @@ only talk.
 ## 6. Release and the app
 
 - [x] `npm run check` + `npm run check:example` green
-- [ ] 0.3.0: explicit `npm version 0.3.0 --workspaces --include-workspace-root`, tag, push
-- [ ] publish by hand — trusted publishing is still unconfigured on npmjs.com, so the tag job 404s (see CONTRIBUTING.md §Releasing)
-- [ ] Recipely: bump to 0.3.0 and pass `page: false` — it has its own fifty-word vocabulary and two overlapping ones compete for the same sentence; branch → four gates → PR → `dev`
+- [x] 0.3.0: explicit `npm version 0.3.0 --workspaces --include-workspace-root`, tag, push
+- [x] publish by hand — trusted publishing is still unconfigured on npmjs.com, so the tag job 404s (see CONTRIBUTING.md §Releasing)
+- [x] Recipely: bump to 0.3.0 and pass `page: false` — it has its own fifty-word vocabulary and two overlapping ones compete for the same sentence; branch → four gates → PR → `dev`
 
 ## Verification
 
