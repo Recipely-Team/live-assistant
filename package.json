@@ -1,10 +1,10 @@
 {
   "name": "live-assistant",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "A real-time voice assistant for React Native apps and the web, built on Gemini Live.",
   "license": "MIT",
-  "author": "Recep Tayyip Ekşi",
+  "author": "Recep Tayyip Ek\u015fi",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Recipely-Team/live-assistant.git"
@@ -19,10 +19,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "check": "npm run lint && npm run typecheck && npm run build && npm test && npm run check:pack && npm run check:docs",
+    "check": "npm run lint && npm run typecheck && npm run build && npm test && npm run check:links && npm run check:pack && npm run check:docs",
     "check:pack": "node scripts/assert-tarballs.mjs",
     "check:docs": "node scripts/assert-doc-links.mjs",
-    "check:example": "npm run typecheck -w @live-assistant/example-expo-app && npm run config -w @live-assistant/example-expo-app && npm run build:web -w @live-assistant/example-expo-app"
+    "check:example": "npm run typecheck -w @live-assistant/example-expo-app && npm run config -w @live-assistant/example-expo-app && npm run build:web -w @live-assistant/example-expo-app",
+    "check:links": "node scripts/assert-workspace-links.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

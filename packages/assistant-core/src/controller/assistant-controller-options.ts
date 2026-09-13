@@ -1,6 +1,7 @@
 import type { AssistantMicrophone } from '../audio/assistant-microphone';
 import type { AssistantPlayer } from '../audio/assistant-player';
 import type { AssistantSession } from '../session/session';
+import type { PageToolsOptions } from '../page/page-tools-options';
 import type { ToolRegistry } from '../tools/tool-registry';
 
 /**
@@ -22,6 +23,14 @@ export interface AssistantControllerOptions<Connection> {
   readonly player: AssistantPlayer;
   readonly getConnection: (request: { readonly resumptionHandle?: string }) => Promise<Connection>;
   readonly tools?: ToolRegistry;
+  /**
+   * Reading and driving the page the user is looking at, with no app code.
+   *
+   * On by default wherever a document exists, off where none does. `false`
+   * removes it; an object narrows it (`{ actions: ['read'] }`), confines it to
+   * part of the page (`root`), or gives a phone a router to navigate with.
+   */
+  readonly page?: boolean | PageToolsOptions;
   readonly timing?: {
     /** A pause this long ends an utterance; after the user's, the turn is the model's. Default 1200. */
     readonly utteranceGapMs?: number;

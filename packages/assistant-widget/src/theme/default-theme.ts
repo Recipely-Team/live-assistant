@@ -17,6 +17,7 @@ export const defaultTheme: AssistantTheme = {
     danger: '#D93F3F',
     onPrimary: '#FFFFFF',
   },
+  logoSize: 0.55,
   orbSize: 64,
   radius: 16,
   spacing: 12,

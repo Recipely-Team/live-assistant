@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Easing, Pressable, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Image, Pressable, StyleSheet, View } from 'react-native';
 import { AssistantStatus, smoothLevel } from '@live-assistant/core';
 import { useAssistantController, useAssistantState, useLevelFrames } from '@live-assistant/react';
 import type { AssistantState } from '@live-assistant/core';
@@ -31,6 +31,9 @@ const REST = 1;
  *   when the status or mute changes.
  * - **Reduce Motion is honoured.** With it on the orb keeps its colours and
  *   stops moving.
+ * - **`theme.logo` replaces the plain fill**, not the orb: the glow and the
+ *   ring still read the two voices, so an app's mark can sit in the middle of
+ *   them without costing the one thing the orb is for.
  */
 export function AssistantOrb({ onPress, size }: AssistantOrbProps) {
   const theme = useWidgetTheme();
@@ -102,8 +105,12 @@ export function AssistantOrb({ onPress, size }: AssistantOrbProps) {
       <Animated.View
         style={[styles.layer, circle, { borderColor: theme.colors.userGlow, borderWidth: OrbMotion.ringBorder, opacity: isIdle || isMuted ? 0 : OrbMotion.ringOpacity, transform: [{ scale: ringScale }] }]}
       />
-      <Animated.View style={[circle, { backgroundColor: theme.colors.primary, opacity: Animated.multiply(pulse, isMuted ? OrbMotion.mutedOpacity : REST) }]}>
-        <View style={styles.fill} />
+      <Animated.View style={[circle, styles.core, { backgroundColor: theme.colors.primary, opacity: Animated.multiply(pulse, isMuted ? OrbMotion.mutedOpacity : REST) }]}>
+        {theme.logo === undefined ? (
+          <View style={styles.fill} />
+        ) : (
+          <Image source={theme.logo} resizeMode="contain" style={{ width: diameter * theme.logoSize, height: diameter * theme.logoSize }} />
+        )}
       </Animated.View>
     </Pressable>
   );
@@ -111,6 +118,7 @@ export function AssistantOrb({ onPress, size }: AssistantOrbProps) {
 
 const styles = StyleSheet.create({
   hit: { alignItems: 'center', justifyContent: 'center' },
+  core: { alignItems: 'center', justifyContent: 'center' },
   layer: { position: 'absolute', pointerEvents: 'none' },
   fill: { flex: 1 },
 });

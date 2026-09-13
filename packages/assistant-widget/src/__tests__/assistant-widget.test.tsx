@@ -1,5 +1,5 @@
 import { Profiler } from 'react';
-import { Text } from 'react-native';
+import { Image, Text } from 'react-native';
 import { act, create } from 'react-test-renderer';
 import type { ReactTestInstance, ReactTestRenderer } from 'react-test-renderer';
 import {
@@ -201,5 +201,28 @@ describe('AssistantOrb', () => {
     });
 
     expect(commits - afterMount).toBeLessThanOrEqual(1);
+  });
+
+  it('draws the app\'s logo inside the orb when the theme carries one, and nothing when it does not', () => {
+    const { controller } = setup();
+    const render = (theme?: AssistantWidgetProps['theme']): ReactTestRenderer => {
+      let tree!: ReactTestRenderer;
+      act(() => {
+        tree = create(
+          <AssistantProvider controller={controller}>
+            <AssistantWidget theme={theme} />
+          </AssistantProvider>,
+        );
+      });
+      return tree;
+    };
+
+    const withLogo = render({ logo: { uri: 'https://example.com/mark.png' }, orbSize: 100, logoSize: 0.5 });
+    const withoutLogo = render();
+
+    const image = withLogo.root.findByType(Image);
+    expect(image.props.source).toEqual({ uri: 'https://example.com/mark.png' });
+    expect(image.props.style).toMatchObject({ width: 50, height: 50 });
+    expect(withoutLogo.root.findAllByType(Image)).toHaveLength(0);
   });
 });

@@ -17,6 +17,12 @@ const settle = async (): Promise<void> => {
   await jest.advanceTimersByTimeAsync(0);
 };
 
+const emptyPage = {
+  title: 'Test',
+  querySelector: () => null,
+  querySelectorAll: () => [],
+};
+
 function build(overrides: Partial<AssistantControllerOptions<string>> = {}) {
   const calls: string[] = [];
   const session = new FakeSession();
@@ -595,5 +601,20 @@ describe('AssistantController — state for a UI', () => {
     const { controller } = await started();
 
     expect(controller.outputLevel.level()).toBe(0.8);
+  });
+
+  // The pack is registered by the controller rather than by the app, because
+  // `definitions()` is what the app hands its token server: a tool the token
+  // did not declare does not exist to the model, with no error saying so.
+  it('declares the page pack by itself, so the token can carry it', () => {
+    const { controller } = build({ page: { document: emptyPage } });
+
+    expect(controller.tools.definitions().map((definition) => definition.name)).toContain('page');
+  });
+
+  it('declares nothing of the sort when the app turned it off', () => {
+    const { controller } = build({ page: false, tools: new ToolRegistry() });
+
+    expect(controller.tools.definitions()).toEqual([]);
   });
 });

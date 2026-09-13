@@ -44,4 +44,39 @@ Architecture and on the web; on the old architecture there is simply no shadow.
 
 See the [overview](https://github.com/Recipely-Team/live-assistant#customising-the-widget).
 
+## Colours, sizes and your logo
+
+`theme` takes any part of the whole; what you leave out keeps its default.
+
+| Colour | Default | Where it shows |
+| --- | --- | --- |
+| `primary` | `#5B5BD6` | The orb at rest, and the controls' accent |
+| `userGlow` | `#3E9BFF` | The ring that follows the user's voice |
+| `assistantGlow` | `#B45BFF` | The glow that follows the assistant's voice |
+| `surface` | `#FFFFFF` | The panel |
+| `text` | `#1C1C28` | Panel text |
+| `mutedText` | `#6B6B80` | The status line and secondary text |
+| `userBubble` / `userText` | `#5B5BD6` / `#FFFFFF` | The user's bubble |
+| `assistantBubble` / `assistantText` | `#F0F0F7` / `#1C1C28` | The assistant's bubble |
+| `toolChip` / `toolText` | `#E8F5EC` / `#1F6B3A` | A tool-run chip |
+| `danger` | `#D93F3F` | Errors and the end-session control |
+| `onPrimary` | `#FFFFFF` | Anything drawn on `primary` |
+
+| Value | Default | What it does |
+| --- | --- | --- |
+| `logo` | — | **Your mark, inside the orb.** Any `<Image source>`: a `require(...)`, a `{ uri }`, an imported asset. The glow and the ring still read the two voices around it |
+| `logoSize` | `0.55` | The logo's share of the orb's diameter |
+| `orbSize` | `64` | The orb's diameter |
+| `radius` | `16` | Corner radius of the panel and controls |
+| `spacing` | `12` | Padding and the gaps between rows |
+| `fontSize` | `15` | Transcript text size |
+| `panelMaxHeight` | `420` | How tall the panel grows before the transcript scrolls |
+
+```tsx
+<AssistantWidget
+  theme={{ logo: require('./assets/mark.png'), colors: { primary: '#E4572E' }, radius: 8 }}
+/>
+```
+
+
 A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).

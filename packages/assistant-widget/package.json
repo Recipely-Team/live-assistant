@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/widget",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A ready-made voice assistant UI for React Native and the web: an orb that moves with the voices, a transcript and controls, themed and worded by the app. Built only on @live-assistant/react's public hooks.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -40,8 +40,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/core": "0.2.0",
-    "@live-assistant/react": "0.2.0"
+    "@live-assistant/core": "0.3.0",
+    "@live-assistant/react": "0.3.0"
   },
   "peerDependencies": {
     "react": ">=18",

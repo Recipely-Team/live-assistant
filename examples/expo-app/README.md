@@ -1,7 +1,15 @@
 # Example — Expo app
 
-A working integration in one file. Copy `App.tsx`, point `TOKEN_ENDPOINT` at your
-own server, and you have a voice assistant.
+A working integration in one file — and inside it, one component. Copy `App.tsx`,
+point `TOKEN_ENDPOINT` at your own server, and you have a voice assistant:
+
+```tsx
+<LiveAssistant tokenEndpoint={TOKEN_ENDPOINT} tools={tools} />
+```
+
+On the web it can already read the page, follow its links, press its buttons and
+fill its fields with nothing registered; `tools` is for what the page cannot do
+for itself.
 
 ```sh
 npm install

@@ -46,6 +46,41 @@ const stop = assistant.subscribe(() => console.log(assistant.getState().status))
 await assistant.start();
 ```
 
+## Acting on the page, with nothing registered
+
+`createPageTools()` gives the assistant a `page` tool that reads and drives the
+document the user is looking at: `read`, `list`, `navigate`, `back`, `press`,
+`type`, `scroll`. `AssistantController` registers it by itself wherever a
+document exists, so on the web an app that declares no tools at all still has an
+assistant that can do things.
+
+```ts
+new AssistantController({ …, page: false });                  // off
+new AssistantController({ …, page: { actions: ['read'] } });  // narrowed
+new AssistantController({ …, page: { root: '#app', maxCharacters: 2000 } });
+```
+
+It reads the live DOM at the moment of the call — no route table, nothing to
+register on a new screen — and names targets by their accessible name, which is
+what a screen reader announces and what the user just said out loud. Following a
+link **clicks** it rather than assigning the url, so a single-page router stays
+in charge and the live session survives. A target that is not there is answered
+with the names that are.
+
+**On a phone there is no document**, so the pack is inert unless you pass
+`page: { router: { go, back, current } }` — three functions, and navigate and back
+are then the two actions the model is offered.
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `actions` | all seven | Which the model may use; a word left out never reaches it |
+| `name` | `'page'` | The tool's name |
+| `root` | the document | A CSS selector the tools are confined to |
+| `maxCharacters` | `4000` | Cap on `read` |
+| `maxTargets` | `40` | Cap on `list`, per kind |
+| `router` | — | Navigation where there is no DOM |
+| `document` / `window` | the globals | For tests, an iframe or a server render |
+
 See the [overview](https://github.com/Recipely-Team/live-assistant#readme) for the whole picture, including the token
 server your `getConnection` talks to.
 

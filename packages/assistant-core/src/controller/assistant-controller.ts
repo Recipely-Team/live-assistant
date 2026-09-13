@@ -11,6 +11,8 @@ import { Speaker } from '../session/speaker';
 import type { SpeakerType } from '../session/speaker';
 import type { ToolCall } from '../tools/tool-call';
 import { ToolRegistry } from '../tools/tool-registry';
+import { createPageTools } from '../page/create-page-tools';
+import type { PageToolsOptions } from '../page/page-tools-options';
 import type { AssistantControllerOptions } from './assistant-controller-options';
 import type { AssistantState } from './assistant-state';
 import { AssistantStatus } from './assistant-status';
@@ -108,6 +110,9 @@ const isModelOutput = (event: SessionEvent): boolean =>
  *   being heard) are read on an animation clock; `getState()` changes only a
  *   few times a turn.
  */
+const pageOptions = (page: boolean | PageToolsOptions | undefined): PageToolsOptions =>
+  page === undefined || typeof page === 'boolean' ? {} : page;
+
 export class AssistantController<Connection> {
   readonly inputLevel: LevelSource;
   readonly outputLevel: LevelSource;
@@ -141,6 +146,11 @@ export class AssistantController<Connection> {
     this.timing = { ...DEFAULT_TIMING, ...options.timing };
     this.clock = options.clock ?? monotonicClock;
     this.tools = options.tools ?? new ToolRegistry();
+    // Registered here, not left to the app: the page pack is what makes an
+    // assistant that can only talk into one that can act, and `definitions()`
+    // — what the app hands its token server — has to carry it before the
+    // session is set up.
+    if (options.page !== false) for (const tool of createPageTools(pageOptions(options.page))) this.tools.register(tool);
     this.echo = new EchoGate(options.microphone, options.player, this.timing.echoTailMs, this.clock);
     this.inputLevel = { level: () => (this.isHearing() ? options.microphone.level() : NONE) };
     this.outputLevel = { level: () => options.player.level() };

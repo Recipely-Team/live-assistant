@@ -179,57 +179,55 @@ app.post('/assistant/token', requireUser, async (req, res) => {
 });
 ```
 
-**2. In the app**, build the controller once and render the widget near the root:
+**2. In the app**, one component:
 
 ```tsx
-import { AssistantController, ToolRegistry } from '@live-assistant/core';
-import { GeminiLiveSession } from '@live-assistant/gemini';
-import { Microphone, PcmPlayer } from '@live-assistant/audio';
-import { AssistantProvider } from '@live-assistant/react';
-import { AssistantWidget } from '@live-assistant/widget';
-
-const tools = new ToolRegistry([
-  {
-    definition: {
-      name: 'createNote',
-      description: 'Creates a note with the given text',
-      parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] },
-    },
-    run: async ({ text }) => ({ ok: true, id: await notes.create(String(text)) }),
-  },
-]);
-
-const assistant = new AssistantController({
-  session: new GeminiLiveSession(),
-  microphone: new Microphone(),
-  player: new PcmPlayer(),
-  tools,
-  getConnection: async ({ resumptionHandle }) => {
-    const response = await fetch('/assistant/token', {
-      method: 'POST',
-      body: JSON.stringify({ resumptionHandle, languageCode: 'en-US' }),
-    });
-    if (!response.ok) throw await response.json(); // comes back as failure.cause
-    return response.json();
-  },
-});
+import { LiveAssistant } from '@live-assistant/react-native';
 
 export function App() {
   return (
-    <AssistantProvider controller={assistant}>
+    <>
       <Navigation />
-      <AssistantWidget />
-    </AssistantProvider>
+      <LiveAssistant
+        tokenEndpoint="/assistant/token"
+        headers={{ authorization: `Bearer ${userToken}` }}
+        tools={[
+          {
+            definition: {
+              name: 'createNote',
+              description: 'Creates a note with the given text',
+              parameters: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] },
+            },
+            run: async ({ text }) => ({ ok: true, id: await notes.create(String(text)) }),
+          },
+        ]}
+      />
+    </>
   );
 }
 ```
 
+`<LiveAssistant>` builds the session, the microphone, the player, the registry and
+the controller, and renders the provider and the widget. The one value it cannot
+invent is your token route. Installing the five packages separately and doing it
+by hand is still there — see
+[Headless](#headless-your-own-ui) and the umbrella's
+[README](https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-react-native#readme).
+
+**On the web it can already act on the page.** With nothing registered, the
+assistant reads the page, lists what is on it, follows links, presses buttons,
+fills fields and scrolls — from the live DOM, named as a screen reader would name
+them. `page: false` turns it off, `page: { actions: [...] }` narrows it, and on a
+phone `page: { router }` gives it your navigation in three functions.
+
 ## Customising the widget
+
+Every prop below is also a prop of `<LiveAssistant>`, which passes them through.
 
 ```tsx
 <AssistantWidget
   placement="bottom-left"
-  theme={{ colors: { primary: '#E4572E', assistantGlow: '#FFB400' }, radius: 8 }}
+  theme={{ logo: require('./assets/mark.png'), colors: { primary: '#E4572E', assistantGlow: '#FFB400' }, radius: 8 }}
   strings={{ status: { listening: 'Dinliyorum' }, stop: 'Bitir', errors: { microphone_denied: 'Mikrofon kapalı' } }}
   renderMessage={(entry, fallback) => (
     <Row>
@@ -241,7 +239,7 @@ export function App() {
 />
 ```
 
-- **`theme`** overrides colours, orb size, radius, spacing, font size and panel height. Anything you leave out keeps the default.
+- **`theme`** overrides the fourteen colours, the orb size, radius, spacing, font size and panel height — and takes `logo`, your own mark drawn inside the orb, with the two voices still glowing around it. Anything you leave out keeps the default; every value is listed in the [umbrella's configuration tables](https://github.com/Recipely-Team/live-assistant/tree/main/packages/assistant-react-native#configuration).
 - **`strings`** overrides every word the widget shows or reads out, including statuses, errors, end reasons and tool chips. The defaults are in English.
 - **`renderMessage` / `renderTool`** receive each transcript entry together with the default rendering (`fallback`), so you can wrap it, replace it, or hide it.
 - `AssistantOrb` (starts/stops on its own unless you pass `onPress`), `AssistantPanel`, `AssistantTranscript`, `StatusLine`, `AssistantControls`, `AssistantComposer`, `MessageBubble` and `ToolChip` are also exported, so you can compose your own layout from them. Inside your own parts, `useWidgetTheme()` and `useWidgetStrings()` read the merged theme and strings.

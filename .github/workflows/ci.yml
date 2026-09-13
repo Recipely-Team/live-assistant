@@ -20,6 +20,9 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      # First, because everything after it is only meaningful if the packages
+      # are reading each other's source rather than the last release.
+      - run: npm run check:links
       - run: npm run lint
       - run: npm run typecheck
       # Before the tests: a package that cannot build is not publishable, and

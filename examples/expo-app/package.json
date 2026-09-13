@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/example-expo-app",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -13,7 +13,7 @@
     "config": "expo config --type introspect > /dev/null"
   },
   "dependencies": {
-    "@live-assistant/react-native": "0.2.0",
+    "@live-assistant/react-native": "0.3.0",
     "expo": "~57.0.22",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
