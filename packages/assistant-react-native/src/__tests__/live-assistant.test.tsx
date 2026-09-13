@@ -156,6 +156,42 @@ describe('<LiveAssistant>', () => {
     expect(failures.map((failure) => failure.code)).toContain(AssistantFailureCode.ConnectionRefused);
   });
 
+  // The symptom: the assistant hung up mid-sentence whenever anything above it
+  // re-rendered. `onReady` was an effect dependency, and an inline arrow — the
+  // ordinary way to pass it — is a new function on every render, so the effect
+  // re-ran and its cleanup stopped the live session.
+  it('keeps talking when the tree around it re-renders with a new onReady', async () => {
+    const tree = render();
+    await act(async () => {
+      await controller?.start();
+    });
+    expect(controller?.getState().status).not.toBe('idle');
+
+    act(() => {
+      tree.update(
+        <LiveAssistant
+          tokenEndpoint="https://api.example.com/assistant/token"
+          onReady={(ready) => (controller = ready)}
+          onFailure={() => undefined}
+        />,
+      );
+    });
+
+    expect(controller?.getState().status).not.toBe('idle');
+  });
+
+  it('hands the controller over once, not again on every render', () => {
+    const seen: unknown[] = [];
+    const tree = render({ onFailure: () => undefined });
+    act(() => {
+      tree.update(
+        <LiveAssistant tokenEndpoint="https://api.example.com/assistant/token" onReady={(ready) => seen.push(ready)} />,
+      );
+    });
+
+    expect(seen).toHaveLength(0);
+  });
+
   it('stops the session when it leaves the tree', async () => {
     const tree = render();
     await act(async () => {

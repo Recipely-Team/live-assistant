@@ -60,6 +60,10 @@ const JSON_TYPE = 'application/json';
  * - **The controller is built once**, in a `useState` initialiser. It owns a
  *   socket and two devices; rebuilding it on a render would start a session per
  *   render. The session is stopped when this unmounts.
+ * - **Handlers are held, not depended on.** `onReady` and `onFailure` are read
+ *   through a ref, so passing them inline — which is how anyone passes them —
+ *   cannot re-run the lifecycle effect. It once could, and its cleanup hung up
+ *   on a live session whenever a parent re-rendered.
  * - **`headers` and `language` are read at connection time, not at mount.** An
  *   app whose `Authorization` header is refreshed mid-session would otherwise
  *   reconnect with the token it had when the component first rendered — which
@@ -86,8 +90,8 @@ export function LiveAssistant({
   ...widget
 }: LiveAssistantProps) {
   // Read at connection time rather than captured at mount: see the doc block.
-  const latest = useRef({ tokenEndpoint, getConnection, language, headers });
-  latest.current = { tokenEndpoint, getConnection, language, headers };
+  const latest = useRef({ tokenEndpoint, getConnection, language, headers, onReady, onFailure });
+  latest.current = { tokenEndpoint, getConnection, language, headers, onReady, onFailure };
 
   const [controller] = useState(
     () =>
@@ -112,14 +116,18 @@ export function LiveAssistant({
       }),
   );
 
+  // Only the controller is a dependency. `onReady` used to be one too, and an
+  // inline arrow — the ordinary way to pass it — is a new function on every
+  // render, so the effect re-ran and its cleanup hung up on a live session
+  // whenever anything above this re-rendered.
   useEffect(() => {
-    onReady?.(controller);
+    latest.current.onReady?.(controller);
     return () => void controller.stop();
-  }, [controller, onReady]);
+  }, [controller]);
 
   return (
     <AssistantProvider controller={controller}>
-      <FailureReporter onFailure={onFailure} />
+      <FailureReporter onFailure={latest.current.onFailure} />
       <AssistantWidget {...widget} />
     </AssistantProvider>
   );
@@ -127,11 +135,19 @@ export function LiveAssistant({
 
 const selectError = (state: { readonly error: AssistantFailure | null }): AssistantFailure | null => state.error;
 
-/** Reports failures to the app without re-rendering the widget for them. */
+/**
+ * Reports failures to the app without re-rendering the widget for them.
+ *
+ * The handler is held in a ref for the same reason the lifecycle effect takes
+ * only the controller: an inline arrow changes identity every render, and a
+ * handler in the dependencies would report the same failure again each time.
+ */
 function FailureReporter({ onFailure }: { readonly onFailure?: (failure: AssistantFailure) => void }) {
   const error = useAssistantState(selectError);
+  const report = useRef(onFailure);
+  report.current = onFailure;
   useEffect(() => {
-    if (error !== null) onFailure?.(error);
-  }, [error, onFailure]);
+    if (error !== null) report.current?.(error);
+  }, [error]);
   return null;
 }

@@ -3,6 +3,11 @@
 `Microphone` and `PcmPlayer` for iOS, Android and the web. The platform is picked
 by file extension, so you import one name and get the right implementation.
 
+**Just want it working?** [`@live-assistant/react-native`](https://www.npmjs.com/package/@live-assistant/react-native)
+installs all of this and gives you `<LiveAssistant tokenEndpoint="…" />` — one
+component that builds the session, the audio, the controller and the widget.
+Reach for the packages below it when you want to hold the pieces apart.
+
 ```sh
 npm install @live-assistant/audio react-native-audio-api
 ```

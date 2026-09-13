@@ -4,6 +4,11 @@ The Gemini Live implementation of `AssistantSession`: one WebSocket, its setup
 handshake, and the frames in both directions — binary JSON frames, 16 kHz in,
 24 kHz out, generic tool calls and cancellations.
 
+**Just want it working?** [`@live-assistant/react-native`](https://www.npmjs.com/package/@live-assistant/react-native)
+installs all of this and gives you `<LiveAssistant tokenEndpoint="…" />` — one
+component that builds the session, the audio, the controller and the widget.
+Reach for the packages below it when you want to hold the pieces apart.
+
 ```sh
 npm install @live-assistant/gemini @live-assistant/core
 ```

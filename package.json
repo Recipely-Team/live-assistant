@@ -1,10 +1,10 @@
 {
   "name": "live-assistant",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "A real-time voice assistant for React Native apps and the web, built on Gemini Live.",
   "license": "MIT",
-  "author": "Recep Tayyip Ek\u015fi",
+  "author": "Recep Tayyip Ekşi",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Recipely-Team/live-assistant.git"

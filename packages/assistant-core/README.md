@@ -3,6 +3,11 @@
 The provider-neutral heart of Live Assistant. It depends on nothing, runs
 anywhere JavaScript does, and knows about no UI framework.
 
+**Just want it working?** [`@live-assistant/react-native`](https://www.npmjs.com/package/@live-assistant/react-native)
+installs all of this and gives you `<LiveAssistant tokenEndpoint="…" />` — one
+component that builds the session, the audio, the controller and the widget.
+Reach for the packages below it when you want to hold the pieces apart.
+
 ```sh
 npm install @live-assistant/core
 ```

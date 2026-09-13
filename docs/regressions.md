@@ -23,6 +23,12 @@ short enough to read in one sitting.
 | The example app was invisible to everyone who arrives from npm: seven package pages, none mentioning it, and the root README that does link it is not published | npm renders each package's own README and nothing else. The example is `private`, so it never ships either — the only route was the sidebar's repository link | Every package page links the example by URL, and `assert-doc-links.mjs` resolves the path inside any `github.com/Recipely-Team/live-assistant/tree/main/...` URL against the tree, so renaming the folder fails the gate instead of breaking seven pages quietly |
 | Every package's "see the overview" link led nowhere, on the pages people read on npmjs.com | Extracting the library moved `packages/README.md` to the repository root; the six links to `../README.md` were never updated. Lint, build and the suite all passed | `scripts/assert-doc-links.mjs` resolves every link and anchor, and rejects a relative link inside `packages/` outright — those pages are rendered on the registry, where a path up the tree leads nowhere |
 
+## React surface
+
+| Symptom | Root cause | What prevents it now |
+|---|---|---|
+| The assistant hung up mid-sentence whenever anything above `<LiveAssistant>` re-rendered | `onReady` was a dependency of the effect that stops the session on unmount. An inline arrow — how anyone passes a handler — is a new function every render, so the effect re-ran and its cleanup stopped a live session | Handlers are held in a ref and the effect depends only on the controller; a test re-renders with a fresh `onReady` and asserts the session is still up |
+
 ## The rule these share
 
 A gate that reads the working tree cannot see a packaging bug. Lint, typecheck,

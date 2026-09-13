@@ -15,8 +15,10 @@ same way in every app — so they are not yours to write. The one value it canno
 invent is the route on **your** server that mints a short-lived token, because
 your API key must never ship in an app bundle.
 
-This page is the whole of it: the four steps below, then a table for every value
-you can pass. If you would rather read code than prose,
+This page is the whole of it: five steps, then a table for every value you can
+pass. **Building for the web only?** Steps 1 and 2 are the native setup — there,
+the install is the whole of it and nothing needs rebuilding; skip to
+[step 3](#3-mint-tokens-on-your-server). If you would rather read code than prose,
 [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app)
 is a working app in one file, and CI builds it on every change.
 
@@ -38,6 +40,8 @@ On the web nothing native is needed, but `getUserMedia` only exists in a
 **secure context** — serve the page from `https://` or `localhost`.
 
 ## 2. Configure the microphone — one line
+
+*Native only. A web build needs nothing from this step.*
 
 ```json
 {
