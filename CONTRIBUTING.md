@@ -74,12 +74,38 @@ test code in the same repository as the thing it tests.
 
 ## Releasing
 
-Versions move together: all seven packages share one version number, because
-the umbrella pins its members exactly and a mismatch is not installable.
+Versions move together: all seven packages share one version number, because the
+umbrella pins its members exactly and a mismatch is not installable. The gate
+fails on a tree where they disagree, or where the workspace root disagrees with
+them — the release tag is cut from the root.
+
+Pass the version, never `patch`/`minor`/`major`: `npm version` takes the tag from
+the workspace root, so a relative bump there tags whatever the root happened to
+say rather than what the packages now say. With the root at `0.0.0`, `minor`
+tagged `v0.1.0` while the packages said `0.2.0`, and the release job refused it.
+
+```sh
+npm version <x.y.z> --workspaces --include-workspace-root --git-tag-version=false
+npm run check
+git commit -am "release: <x.y.z>" && git tag -a v<x.y.z> -m "v<x.y.z>"
+git push --follow-tags
+```
+
+The tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml),
+which publishes all seven with no credential in this repository: npm's trusted
+publishing exchanges GitHub's OIDC token for a short-lived grant.
+
+**That exchange needs each package to name this workflow as its trusted
+publisher, once, on npmjs.com** (the package's Settings → Trusted publisher →
+GitHub Actions, repository `Recipely-Team/live-assistant`, workflow
+`release.yml`). Until a package is configured, the registry treats the push as
+unauthenticated and answers `404 Not Found - PUT` — which is what happened to
+the v0.2.0 tag, and reads like a missing package rather than a missing grant.
+
+Publishing by hand is the fallback, and the same order:
 
 ```sh
 npm login
-npm version <patch|minor|major> --workspaces --include-workspace-root
 npm run build
 npm publish -w @live-assistant/core
 npm publish -w @live-assistant/gemini
@@ -90,8 +116,9 @@ npm publish -w @live-assistant/widget
 npm publish -w @live-assistant/react-native
 ```
 
-The order is the dependency order: a package cannot be installed before the
-packages it depends on exist at the pinned version. Each package's
+The order is the dependency order, in the workflow and by hand alike: a package
+cannot be installed before the packages it depends on exist at the pinned
+version. Each package's
 `prepack` builds it, so `dist/` is fresh whether or not anyone remembered —
 `prepack` rather than `prepublishOnly`, because npm runs it for `npm pack` as
 well, and packing to look at a release should not produce something different

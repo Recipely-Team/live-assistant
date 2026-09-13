@@ -5,6 +5,12 @@ name: Release
 # publish grant. There is no NPM_TOKEN in this repository, and there should never
 # be one — a token that can publish is the thing this replaces.
 #
+# Each package must name this workflow as its trusted publisher once, on
+# npmjs.com (Settings -> Trusted publisher -> GitHub Actions). Until it does,
+# the registry sees an unauthenticated write and answers `404 Not Found - PUT`,
+# which reads like a missing package rather than a missing grant; see the
+# fallback in CONTRIBUTING.md.
+#
 # To release: bump locally and push the tag.
 #
 #   npm version <x.y.z> --workspaces --include-workspace-root
