@@ -48,3 +48,5 @@ await assistant.start();
 
 See the [overview](https://github.com/Recipely-Team/live-assistant#readme) for the whole picture, including the token
 server your `getConnection` talks to.
+
+A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).

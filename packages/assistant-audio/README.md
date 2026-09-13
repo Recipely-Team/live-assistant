@@ -85,3 +85,5 @@ secure context on the web) · `player_unavailable`.
 Codes, never sentences: map them to words in your own app.
 
 See the [overview](https://github.com/Recipely-Team/live-assistant#readme) for how this fits together.
+
+A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).

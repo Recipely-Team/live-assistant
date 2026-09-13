@@ -47,3 +47,5 @@ function MyAssistantBar() {
 
 The controller is yours to build and own; this package never creates one. See
 the [overview](https://github.com/Recipely-Team/live-assistant#headless-your-own-ui).
+
+A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).

@@ -43,3 +43,5 @@ indicator. The panel's shadow uses `boxShadow`, which renders on the New
 Architecture and on the web; on the old architecture there is simply no shadow.
 
 See the [overview](https://github.com/Recipely-Team/live-assistant#customising-the-widget).
+
+A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).

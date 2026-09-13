@@ -32,3 +32,5 @@ Tokens are single-use. Reusing one closes the socket during the handshake, which
 surfaces as `closed_before_ready`.
 
 See the [overview](https://github.com/Recipely-Team/live-assistant#readme).
+
+A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).

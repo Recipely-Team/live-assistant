@@ -4,7 +4,9 @@ One install for a voice assistant in a React Native or Expo app: the controller,
 a Gemini Live connection, microphone and playback, React bindings and a
 ready-made widget, re-exported from one place.
 
-This page is the whole integration. You should not need another one.
+This page is the whole integration. You should not need another one. If you would
+rather read code than prose, [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app) is the same thing
+in one file, and CI builds it on every change.
 
 ---
 

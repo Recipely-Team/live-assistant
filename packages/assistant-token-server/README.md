@@ -80,3 +80,5 @@ npx tsx packages/assistant-token-server/scripts/live-check.ts
 ```
 
 See the [overview](https://github.com/Recipely-Team/live-assistant#readme) for the app half.
+
+A working app that puts this together: [`examples/expo-app`](https://github.com/Recipely-Team/live-assistant/tree/main/examples/expo-app).
