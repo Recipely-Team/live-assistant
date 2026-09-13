@@ -64,6 +64,10 @@ const JSON_TYPE = 'application/json';
  *   through a ref, so passing them inline — which is how anyone passes them —
  *   cannot re-run the lifecycle effect. It once could, and its cleanup hung up
  *   on a live session whenever a parent re-rendered.
+ * - **`tools`, `page` and `timing` are read once**, when the assistant is
+ *   created: they configure a controller that outlives any one render. Register
+ *   a tool later through the controller `onReady` hands you. `theme`, `strings`,
+ *   `headers` and `language` are live.
  * - **`headers` and `language` are read at connection time, not at mount.** An
  *   app whose `Authorization` header is refreshed mid-session would otherwise
  *   reconnect with the token it had when the component first rendered — which
@@ -90,8 +94,8 @@ export function LiveAssistant({
   ...widget
 }: LiveAssistantProps) {
   // Read at connection time rather than captured at mount: see the doc block.
-  const latest = useRef({ tokenEndpoint, getConnection, language, headers, onReady, onFailure });
-  latest.current = { tokenEndpoint, getConnection, language, headers, onReady, onFailure };
+  const latest = useRef({ tokenEndpoint, getConnection, language, headers, onReady });
+  latest.current = { tokenEndpoint, getConnection, language, headers, onReady };
 
   const [controller] = useState(
     () =>
@@ -105,7 +109,10 @@ export function LiveAssistant({
         getConnection: async ({ resumptionHandle }) => {
           const current = latest.current;
           if (current.getConnection !== undefined) return current.getConnection({ resumptionHandle });
-          const response = await fetch(current.tokenEndpoint as string, {
+          // Types make this unreachable; JavaScript does not, and `fetch(undefined)`
+          // fails as a network error nobody can place.
+          if (current.tokenEndpoint === undefined) throw new Error('LiveAssistant needs tokenEndpoint or getConnection');
+          const response = await fetch(current.tokenEndpoint, {
             method: 'POST',
             headers: { 'content-type': JSON_TYPE, ...current.headers },
             body: JSON.stringify({ resumptionHandle, languageCode: current.language }),
@@ -127,7 +134,7 @@ export function LiveAssistant({
 
   return (
     <AssistantProvider controller={controller}>
-      <FailureReporter onFailure={latest.current.onFailure} />
+      <FailureReporter onFailure={onFailure} />
       <AssistantWidget {...widget} />
     </AssistantProvider>
   );

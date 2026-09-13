@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/gemini",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Gemini Live adapter for @live-assistant/core: the socket, its setup handshake and the frames in both directions.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -40,6 +40,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/core": "0.3.1"
+    "@live-assistant/core": "0.3.2"
   }
 }

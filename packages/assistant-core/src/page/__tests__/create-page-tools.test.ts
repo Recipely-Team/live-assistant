@@ -149,6 +149,17 @@ describe('the page pack', () => {
     expect(win.scrollTo).toHaveBeenCalledWith(0, 0);
   });
 
+  // A window that reports no height still has to move: scrolling by nothing
+  // reads to the model as an answered call that did what was asked.
+  it('still scrolls a page whose window reports no height', async () => {
+    const win = { ...window(), innerHeight: undefined };
+    const tool = only(createPageTools({ document: page({}), window: win }));
+
+    await tool.run({ action: PageAction.Scroll, value: 'down' }, { id: '1', name: 'page', args: {} });
+
+    expect(win.scrollBy).toHaveBeenCalledWith(0, 720);
+  });
+
   it('goes back through the history, or through a router when one is given', async () => {
     const win = window();
     const router = { go: jest.fn(), back: jest.fn(), current: () => '/recipes' };

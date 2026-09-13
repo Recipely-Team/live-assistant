@@ -14,6 +14,8 @@ const DEFAULT_MAX_TARGETS = 40;
 const NOTHING = 0;
 const ORIGIN = 0;
 const PAGE_SHARE = 0.9;
+// A page whose window reports no height still has to move when asked.
+const ASSUMED_VIEWPORT = 800;
 const BOTTOM = 1_000_000;
 const OK = true;
 const FAILED = false;
@@ -146,7 +148,7 @@ export function createPageTools(options: PageToolsOptions = {}): AssistantTool[]
     }
 
     const way = value ?? ScrollWay.Down;
-    const height = window?.innerHeight ?? NOTHING;
+    const height = window?.innerHeight ?? ASSUMED_VIEWPORT;
     if (way === ScrollWay.Top) window?.scrollTo?.(ORIGIN, ORIGIN);
     else if (way === ScrollWay.Bottom) window?.scrollTo?.(ORIGIN, BOTTOM);
     else window?.scrollBy?.(ORIGIN, height * PAGE_SHARE * (way === ScrollWay.Up ? -1 : 1));
