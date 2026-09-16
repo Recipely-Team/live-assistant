@@ -108,11 +108,37 @@ describe('mintGeminiLiveToken', () => {
   });
 
   it('reports an unreachable Google instead of throwing', async () => {
-    const { fetchImpl } = fakeFetch(() => Promise.reject(new Error('ETIMEDOUT')));
+    const thrown = new Error('ETIMEDOUT');
+    const { fetchImpl } = fakeFetch(() => Promise.reject(thrown));
 
     await expect(mintGeminiLiveToken({ ...base, fetch: fetchImpl })).resolves.toEqual({
       ok: false,
-      failure: { code: TokenFailureCode.Unreachable, detail: 'ETIMEDOUT' },
+      failure: { code: TokenFailureCode.Unreachable, cause: thrown, detail: 'ETIMEDOUT' },
+    });
+  });
+
+  // The message is not the error. A logger's error serializer wants the object —
+  // the type and the stack are what separate our own timeout from a DNS failure
+  // from a TLS one — and the first integrator had to wrap `fetch` to keep it.
+  it('hands back the error the transport threw, not just its message', async () => {
+    const thrown = new TypeError('fetch failed');
+    const { fetchImpl } = fakeFetch(() => Promise.reject(thrown));
+
+    const minted = await mintGeminiLiveToken({ ...base, fetch: fetchImpl });
+
+    expect(!minted.ok && minted.failure.cause).toBe(thrown);
+  });
+
+  // A throw that is not an `Error` has no `message`, so there is no `detail` to
+  // report: without the cause the failure would say nothing at all about why.
+  it('hands back a thrown value that is not an Error at all', async () => {
+    const { fetchImpl } = fakeFetch(() => Promise.reject('socket hang up'));
+
+    const minted = await mintGeminiLiveToken({ ...base, fetch: fetchImpl });
+
+    expect(!minted.ok && minted.failure).toEqual({
+      code: TokenFailureCode.Unreachable,
+      cause: 'socket hang up',
     });
   });
 

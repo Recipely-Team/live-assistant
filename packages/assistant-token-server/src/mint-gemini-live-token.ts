@@ -34,7 +34,8 @@ function readTokenName(payload: string): string | null {
  *   `newSessionExpireTime` bounds how long the client has to START one, which
  *   is what makes a leaked token worthless a minute later.
  * - **Never throws.** A Gemini outage is a `TokenFailure` your endpoint turns
- *   into its own status code; `detail` carries Google's message for your logs.
+ *   into its own status code; `detail` carries Google's message for your logs,
+ *   and `cause` carries whatever the transport threw, untouched.
  */
 export async function mintGeminiLiveToken(
   options: MintGeminiLiveTokenOptions,
@@ -60,7 +61,11 @@ export async function mintGeminiLiveToken(
     // Inside the try: a body read the timeout aborts rejects too.
     text = await response.text();
   } catch (error) {
-    return fail({ code: TokenFailureCode.Unreachable, ...(error instanceof Error ? { detail: error.message } : {}) });
+    return fail({
+      code: TokenFailureCode.Unreachable,
+      cause: error,
+      ...(error instanceof Error ? { detail: error.message } : {}),
+    });
   }
 
   if (!response.ok) {

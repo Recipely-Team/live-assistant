@@ -1,5 +1,5 @@
 import type { MintGeminiLiveTokenOptions } from './mint-gemini-live-token-options';
-import { toGeminiSchema } from './to-gemini-schema';
+import { toGeminiTools } from './to-gemini-tools';
 
 const AUDIO = 'AUDIO';
 const NONE = 0;
@@ -17,8 +17,9 @@ const NONE = 0;
  *   socket is dropped roughly every ten minutes, and a handle is what lets the
  *   next one continue without paying setup and context again.
  * - **Tools are declared in the measured form.** `parameters` is ordinary JSON
- *   Schema in a `ToolDefinition`; `toGeminiSchema` spells its types the way the
- *   Live API is known to accept them.
+ *   Schema in a `ToolDefinition`; `toGeminiTools` spells its types the way the
+ *   Live API is known to accept them. It is exported, because an app with a typed
+ *   mode alongside its voice mode sends the same array to `generateContent`.
  */
 export function buildLiveSetup(options: MintGeminiLiveTokenOptions): Record<string, unknown> {
   const tools = options.tools ?? [];
@@ -38,19 +39,7 @@ export function buildLiveSetup(options: MintGeminiLiveTokenOptions): Record<stri
         : {}),
     },
     ...(options.systemInstruction !== undefined ? { systemInstruction: { parts: [{ text: options.systemInstruction }] } } : {}),
-    ...(tools.length > NONE
-      ? {
-          tools: [
-            {
-              functionDeclarations: tools.map((tool) => ({
-                name: tool.name,
-                description: tool.description,
-                ...(tool.parameters !== undefined ? { parameters: toGeminiSchema(tool.parameters) } : {}),
-              })),
-            },
-          ],
-        }
-      : {}),
+    ...(tools.length > NONE ? { tools: toGeminiTools(tools) } : {}),
     inputAudioTranscription: {},
     outputAudioTranscription: {},
     contextWindowCompression: { slidingWindow: {} },

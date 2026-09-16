@@ -29,6 +29,17 @@ short enough to read in one sitting.
 |---|---|---|
 | The assistant hung up mid-sentence whenever anything above `<LiveAssistant>` re-rendered | `onReady` was a dependency of the effect that stops the session on unmount. An inline arrow — how anyone passes a handler — is a new function every render, so the effect re-ran and its cleanup stopped a live session | Handlers are held in a ref and the effect depends only on the controller; a test re-renders with a fresh `onReady` and asserts the session is still up |
 
+## Integration surface
+
+| Symptom | Root cause | What prevents it now |
+|---|---|---|
+| The first app to integrate the token server had to wrap `fetch` before calling `mintGeminiLiveToken`, only to keep the error its own transport had thrown | `TokenFailure` flattened a thrown error to `error.message`. A message is not a stack, a logger's error serializer wants the object, and a throw that was not an `Error` left no `detail` at all — so the failure said the connection broke without saying how | `TokenFailure` carries `cause`, the thrown value untouched, the way `AssistantFailure` in `core` always has. Two tests pin it, one of them for a non-`Error` throw |
+| The same app rendered its tool declarations into Gemini's wire form with five lines copied out of this package, because its typed mode needed the array the token bakes in | `buildLiveSetup` rendered them privately and the package exported only `toGeminiSchema`, the smaller half. Two renderings of one vocabulary, in two repositories, free to drift with nothing to notice | `toGeminiTools` is exported and `buildLiveSetup` uses it, so there is one rendering; a test asserts the exported array equals the one a minted setup carries |
+
+**Both of these are the same mistake**: the package kept something to itself that
+its consumer could not do without, and the consumer wrote it again — worse, in
+one case. A library is judged by what the integrator still has to invent.
+
 ## The rule these share
 
 A gate that reads the working tree cannot see a packaging bug. Lint, typecheck,

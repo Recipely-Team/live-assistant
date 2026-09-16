@@ -31,7 +31,9 @@ app.post('/assistant/token', requireUser, async (req, res) => {
   });
 
   if (!minted.ok) {
-    console.error('mint failed', minted.failure.code, minted.failure.detail);
+    // `cause` is what the transport threw — hand it to your logger's error
+    // serializer, which wants the object rather than its message.
+    logger.error({ err: minted.failure.cause, detail: minted.failure.detail }, minted.failure.code);
     return res.status(503).json({ error: minted.failure.code });
   }
   res.json(minted.value); // { token, model, wsUrl, expiresAt }
@@ -54,15 +56,34 @@ Declare here, in `tools`, exactly the definitions your app registers handlers
 for. `ToolDefinition` JSON Schema is normalised to the upper-case type names the
 Live API accepts, so you write ordinary JSON Schema.
 
+If your app also has a **typed mode** — an ordinary `generateContent` call
+answering the same user with the same tools — send it `toGeminiTools(tools)`.
+That is the identical array this package bakes into the token, so the two modes
+cannot drift into offering the model different words:
+
+```ts
+import { toGeminiTools } from '@live-assistant/token-server';
+
+await fetch(`${GENERATE_URL}/${model}:generateContent?key=${apiKey}`, {
+  method: 'POST',
+  body: JSON.stringify({ tools: toGeminiTools(toolDefinitions), contents }),
+});
+```
+
 `resumptionHandle` comes from the app when a session is being resumed after the
 provider handed it over; pass it through and the conversation continues.
 
 ## It never throws
 
-Every outcome is a `Result`. Failures are `unreachable` (the network, or Google
-is down), `rejected` (Google refused — a bad key, a model your key cannot call, a
-quota) or `malformed` (an answer that did not parse). Google's own message is in
-`failure.detail` for your logs; do not show it to a user.
+Every outcome is a `Result`, and a failure carries everything there is to know
+about it:
+
+| Field | What it holds |
+|---|---|
+| `code` | `unreachable` (the network, or Google is down), `rejected` (Google refused — a bad key, a model your key cannot call, a quota) or `malformed` (an answer that did not parse) |
+| `status` | The HTTP status, on `rejected` |
+| `detail` | Google's own message, or the thrown error's message. For your logs — never show it to a user |
+| `cause` | On `unreachable`, the value the transport threw, untouched: the timeout, the DNS error, or something that is not an `Error` at all. Pass it to your logger's error serializer — a message is not a stack |
 
 A model can appear in the model list and still not be callable. If `rejected`
 mentions the model, that is usually what happened.
