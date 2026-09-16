@@ -1,6 +1,6 @@
 {
   "name": "live-assistant",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "description": "A real-time voice assistant for React Native apps and the web, built on Gemini Live.",
   "license": "MIT",

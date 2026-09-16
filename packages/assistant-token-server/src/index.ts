@@ -7,3 +7,4 @@ export type { TokenFailureCodeType } from './token-failure-code';
 export { buildLiveSetup } from './build-live-setup';
 export { GeminiEndpoints } from './gemini-endpoints';
 export { toGeminiSchema } from './to-gemini-schema';
+export { toGeminiTools } from './to-gemini-tools';
