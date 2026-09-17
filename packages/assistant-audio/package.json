@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/audio",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Microphone capture and streaming PCM playback for @live-assistant/core, on iOS, Android and the web, with levels an animation can read every frame.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -45,7 +45,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/core": "0.3.3"
+    "@live-assistant/core": "0.3.4"
   },
   "peerDependencies": {
     "react-native": ">=0.76",
