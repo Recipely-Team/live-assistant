@@ -60,7 +60,7 @@ export function findTargets(
  * The target the model meant.
  *
  * Exact first, then a prefix, then anything containing it, then the other way
- * round: asked to press Save, a model says "Save", "save recipe" and "the Save
+ * round: asked to press Save, a model says "Save", "save the form" and "the Save
  * button" on different days, and all three mean the one button on the screen.
  */
 export function matchTarget<T extends { readonly name: string }>(targets: readonly T[], wanted: string): T | undefined {
