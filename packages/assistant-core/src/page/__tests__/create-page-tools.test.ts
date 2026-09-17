@@ -28,9 +28,9 @@ function element(name: string, extras: Partial<PageElement> = {}, log?: Recorded
   };
 }
 
-function page(bySelector: Record<string, PageElement[]>, text = 'Recipes for tonight'): PageDocument {
+function page(bySelector: Record<string, PageElement[]>, text = 'Notes for tonight'): PageDocument {
   return {
-    title: 'Recipely',
+    title: 'Example',
     querySelector: () => element('root', { innerText: text }),
     querySelectorAll: (selectors) => bySelector[selectors] ?? [],
   };
@@ -41,7 +41,7 @@ const BUTTONS = 'button, [role="button"], input[type="submit"], input[type="butt
 const FIELDS = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select';
 
 const window = (over: Partial<PageWindow> = {}): PageWindow => ({
-  location: { href: 'https://example.com/recipes', assign: jest.fn() },
+  location: { href: 'https://example.com/notes', assign: jest.fn() },
   history: { back: jest.fn() },
   scrollY: 0,
   innerHeight: 800,
@@ -63,15 +63,15 @@ describe('the page pack', () => {
 
     expect(answer).toMatchObject({
       ok: true,
-      title: 'Recipely',
-      url: 'https://example.com/recipes',
-      text: 'Recipes for tonight',
+      title: 'Example',
+      url: 'https://example.com/notes',
+      text: 'Notes for tonight',
     });
   });
 
   it('lists what can be followed, pressed and filled, by the name on screen', async () => {
     const document = page({
-      [LINKS]: [element('My recipes')],
+      [LINKS]: [element('My notes')],
       [BUTTONS]: [element('Save')],
       [FIELDS]: [element('Search', { getAttribute: (name) => (name === 'placeholder' ? 'Search' : null), textContent: null })],
     });
@@ -79,33 +79,33 @@ describe('the page pack', () => {
 
     const answer = await tool.run({ action: PageAction.List }, { id: '1', name: 'page', args: {} });
 
-    expect(answer).toMatchObject({ links: ['My recipes'], buttons: ['Save'], fields: ['Search'] });
+    expect(answer).toMatchObject({ links: ['My notes'], buttons: ['Save'], fields: ['Search'] });
   });
 
   // Assigning `location` reloads the document, which throws away the router,
   // the app's state and the live session in the middle of a sentence.
   it('follows a link by clicking it, never by assigning the url', async () => {
     const log: Recorded = { clicked: [], events: [] };
-    const document = page({ [LINKS]: [element('My recipes', {}, log), element('Settings', {}, log)] });
+    const document = page({ [LINKS]: [element('My notes', {}, log), element('Settings', {}, log)] });
     const win = window();
     const tool = only(createPageTools({ document, window: win }));
 
-    const answer = await tool.run({ action: PageAction.Navigate, target: 'my recipes' }, { id: '1', name: 'page', args: {} });
+    const answer = await tool.run({ action: PageAction.Navigate, target: 'my notes' }, { id: '1', name: 'page', args: {} });
 
-    expect(answer).toMatchObject({ ok: true, followed: 'My recipes' });
-    expect(log.clicked).toEqual(['My recipes']);
+    expect(answer).toMatchObject({ ok: true, followed: 'My notes' });
+    expect(log.clicked).toEqual(['My notes']);
     expect(win.location?.assign).not.toHaveBeenCalled();
   });
 
   // A call left unanswered stalls a live session with no error anywhere, and a
   // model told only "no" repeats the same guess. It is told what is there.
   it('answers a target that is not on the page with the names that are', async () => {
-    const document = page({ [LINKS]: [element('My recipes')] });
+    const document = page({ [LINKS]: [element('My notes')] });
     const tool = only(createPageTools({ document, window: window() }));
 
     const answer = await tool.run({ action: PageAction.Navigate, target: 'shopping list' }, { id: '1', name: 'page', args: {} });
 
-    expect(answer).toEqual({ ok: false, error: 'no_match', links: ['My recipes'] });
+    expect(answer).toEqual({ ok: false, error: 'no_match', links: ['My notes'] });
   });
 
   it('presses a button the model named loosely', async () => {
@@ -162,7 +162,7 @@ describe('the page pack', () => {
 
   it('goes back through the history, or through a router when one is given', async () => {
     const win = window();
-    const router = { go: jest.fn(), back: jest.fn(), current: () => '/recipes' };
+    const router = { go: jest.fn(), back: jest.fn(), current: () => '/notes' };
 
     await only(createPageTools({ document: page({}), window: win })).run({ action: PageAction.Back }, { id: '1', name: 'page', args: {} });
     await only(createPageTools({ document: page({}), window: win, router })).run({ action: PageAction.Back }, { id: '2', name: 'page', args: {} });
@@ -174,7 +174,7 @@ describe('the page pack', () => {
   it('confines itself to the root it was given, comma by comma', async () => {
     const asked: string[] = [];
     const document: PageDocument = {
-      title: 'Recipely',
+      title: 'Example',
       querySelector: () => null,
       querySelectorAll: (selectors) => {
         asked.push(selectors);
@@ -200,8 +200,8 @@ describe('the page pack', () => {
     const tool = only(createPageTools({ router }));
 
     expect(tool.definition.parameters?.properties).toMatchObject({ action: { enum: ['navigate', 'back'] } });
-    await tool.run({ action: PageAction.Navigate, target: '/recipes/42' }, { id: '1', name: 'page', args: {} });
-    expect(router.go).toHaveBeenCalledWith('/recipes/42');
+    await tool.run({ action: PageAction.Navigate, target: '/notes/42' }, { id: '1', name: 'page', args: {} });
+    expect(router.go).toHaveBeenCalledWith('/notes/42');
   });
 
   // A word the model is told about but nothing performs comes back as a failed
