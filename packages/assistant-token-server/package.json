@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/token-server",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Server-side helper that mints short-lived Gemini Live tokens with your system instruction, tools and voice baked in, so the API key never reaches a device.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -40,7 +40,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/core": "0.3.3"
+    "@live-assistant/core": "0.3.4"
   },
   "engines": {
     "node": ">=18"

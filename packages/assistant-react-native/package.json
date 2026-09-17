@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/react-native",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "One install for a voice assistant in a React Native or Expo app: the session, a Gemini Live connection, microphone and playback, React bindings and a ready-made widget, all re-exported from one place.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -41,11 +41,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/audio": "0.3.3",
-    "@live-assistant/core": "0.3.3",
-    "@live-assistant/gemini": "0.3.3",
-    "@live-assistant/react": "0.3.3",
-    "@live-assistant/widget": "0.3.3"
+    "@live-assistant/audio": "0.3.4",
+    "@live-assistant/core": "0.3.4",
+    "@live-assistant/gemini": "0.3.4",
+    "@live-assistant/react": "0.3.4",
+    "@live-assistant/widget": "0.3.4"
   },
   "peerDependencies": {
     "react": ">=18",
