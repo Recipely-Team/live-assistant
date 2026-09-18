@@ -1,15 +1,24 @@
 name: Release
 
-# Publishes every package at the version in the tag, with no credential at all:
-# npm's trusted publishing exchanges GitHub's OIDC token for a short-lived
-# publish grant. There is no NPM_TOKEN in this repository, and there should never
-# be one — a token that can publish is the thing this replaces.
+# Publishes every package at the version in the tag.
 #
-# Each package must name this workflow as its trusted publisher once, on
-# npmjs.com (Settings -> Trusted publisher -> GitHub Actions). Until it does,
-# the registry sees an unauthenticated write and answers `404 Not Found - PUT`,
-# which reads like a missing package rather than a missing grant; see the
-# fallback in CONTRIBUTING.md.
+# TWO WAYS TO AUTHENTICATE, and the job takes whichever exists:
+#
+# 1. **Trusted publishing** (preferred): npm exchanges GitHub's OIDC token for a
+#    short-lived grant, and no credential lives in this repository. It needs
+#    each package to name this workflow once on npmjs.com (package Settings ->
+#    Trusted publisher -> GitHub Actions) — seven web forms, and until all seven
+#    are filled in the registry answers `404 Not Found - PUT`, which reads like a
+#    missing package rather than a missing grant.
+# 2. **An `NPM_TOKEN` secret**: a granular access token with write access to the
+#    `@live-assistant` scope. One web form and one `gh secret set`.
+#
+# The second exists because the first never got configured, and four releases in
+# a row were published by hand instead — the fourth of them half-finished when a
+# one-time password expired between packages. A token in a secret is a real cost
+# and it is smaller than that: it is revocable, scoped to one npm scope, and it
+# becomes dead weight the moment trusted publishing is set up, because npm
+# prefers OIDC when both are available.
 #
 # To release: bump locally and push the tag.
 #
@@ -62,12 +71,33 @@ jobs:
           fi
           echo "releasing $packaged"
 
-      # Dependency order: a package cannot be installed before the packages it
-      # depends on exist at the pinned version.
-      - run: npm publish -w @live-assistant/core
-      - run: npm publish -w @live-assistant/gemini
-      - run: npm publish -w @live-assistant/audio
-      - run: npm publish -w @live-assistant/react
-      - run: npm publish -w @live-assistant/token-server
-      - run: npm publish -w @live-assistant/widget
-      - run: npm publish -w @live-assistant/react-native
+      # One step, not seven, and it can be re-run.
+      #
+      # WHY IT SKIPS WHAT IS ALREADY THERE: 0.3.4 went out by hand because this
+      # job could not authenticate, and the one-time password expired after two
+      # of the seven packages — leaving a half-published release that a re-run
+      # of seven plain `npm publish` calls would have failed on immediately, at
+      # the first package that already existed. A release job is worth nothing
+      # if it cannot finish a release that stopped halfway.
+      #
+      # Anything OTHER than "this exact version is already published" still
+      # fails the job: `npm view` decides, so a genuine refusal is not confused
+      # with an idempotent skip.
+      #
+      # Dependency order is kept: a package cannot install before the packages
+      # it pins exist at that version.
+      - name: Publish every package that is not already at this version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -u
+          version="$(node -p "require('./packages/assistant-core/package.json').version")"
+          for pkg in core gemini audio react token-server widget react-native; do
+            name="@live-assistant/$pkg"
+            if [ "$(npm view "$name@$version" version 2>/dev/null)" = "$version" ]; then
+              echo "::notice::$name@$version is already published — skipping"
+              continue
+            fi
+            echo "publishing $name@$version"
+            npm publish -w "$name"
+          done
