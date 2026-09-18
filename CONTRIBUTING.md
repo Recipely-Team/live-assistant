@@ -92,17 +92,29 @@ git push --follow-tags
 ```
 
 The tag runs [`.github/workflows/release.yml`](.github/workflows/release.yml),
-which publishes all seven with no credential in this repository: npm's trusted
-publishing exchanges GitHub's OIDC token for a short-lived grant.
+which authenticates in whichever of two ways is available:
 
-**That exchange needs each package to name this workflow as its trusted
-publisher, once, on npmjs.com** (the package's Settings → Trusted publisher →
-GitHub Actions, repository `Recipely-Team/live-assistant`, workflow
-`release.yml`). Until a package is configured, the registry treats the push as
-unauthenticated and answers `404 Not Found - PUT` — which is what happened to
-the v0.2.0 tag, and reads like a missing package rather than a missing grant.
+1. **Trusted publishing** — npm exchanges GitHub's OIDC token for a short-lived
+   grant, and no credential lives in this repository. It needs each package to
+   name this workflow once on npmjs.com (the package's Settings → Trusted
+   publisher → GitHub Actions, repository `Recipely-Team/live-assistant`,
+   workflow `release.yml`). Seven web forms; until all seven are filled in, the
+   registry treats the push as unauthenticated and answers `404 Not Found - PUT`,
+   which reads like a missing package rather than a missing grant.
+2. **An `NPM_TOKEN` repository secret** — a granular access token with write
+   access to the `@live-assistant` scope:
+   `gh secret set NPM_TOKEN --repo Recipely-Team/live-assistant`. One form, one
+   command. npm prefers OIDC when both are configured, so the token becomes dead
+   weight rather than a conflict once trusted publishing is set up.
 
-Publishing by hand is the fallback, and the same order:
+**The job is idempotent**: it asks the registry what is already published at
+this version and skips those packages. That matters because it is exactly how
+0.3.4 went out — by hand, with a one-time password that expired after two of the
+seven — and a release job that cannot finish a half-finished release is a job
+nobody can rely on. Anything other than "already at this version" still fails
+the run.
+
+Publishing by hand is the fallback of last resort, and the same order:
 
 ```sh
 npm login
