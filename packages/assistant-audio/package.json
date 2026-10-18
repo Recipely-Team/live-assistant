@@ -1,6 +1,6 @@
 {
   "name": "@live-assistant/audio",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Microphone capture and streaming PCM playback for @live-assistant/core, on iOS, Android and the web, with levels an animation can read every frame.",
   "license": "MIT",
   "author": "Recep Tayyip Ekşi",
@@ -27,6 +27,10 @@
     "./dist/microphone.js": "./dist/microphone.web.js",
     "./dist/pcm-player.js": "./dist/pcm-player.web.js"
   },
+  "react-native": {
+    "./dist/microphone.js": "./dist/microphone.js",
+    "./dist/pcm-player.js": "./dist/pcm-player.js"
+  },
   "files": [
     "dist",
     "src",
@@ -45,7 +49,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@live-assistant/core": "0.3.4"
+    "@live-assistant/core": "0.3.5"
   },
   "peerDependencies": {
     "react-native": ">=0.76",
