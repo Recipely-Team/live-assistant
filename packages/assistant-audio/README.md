@@ -52,6 +52,13 @@ Nothing native is involved: the `.web` halves use Web Audio.
   `browser` field points at them, so a browser build never reaches the native
   module. Checked by bundling an installed copy for `platform=browser`:
   `react-native-audio-api` does not appear in the output.
+- On **iOS and Android**, Metro reads `browser` too — it sits in Metro's default
+  `mainFields` after `react-native`. Up to 0.3.4 that sent phones the web
+  microphone: `getUserMedia` does not exist there, so the session reported
+  `microphone_denied` without ever asking and played nothing. The package's
+  `react-native` field now maps both files back to their native builds, and
+  Metro reads that field first. `scripts/assert-native-resolution.mjs` keeps
+  every `browser` entry matched.
 
 Either way `getUserMedia` needs a **secure context**, so serve from `https://` or
 `localhost`. Anything else answers `microphone_unavailable`.
